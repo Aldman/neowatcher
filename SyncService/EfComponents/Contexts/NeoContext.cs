@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SyncService.Constants;
-using SyncService.NeoApiComponents;
-using SyncService.NeoApiComponents.Main;
+using SyncService.EfComponents.DbSets;
 
-namespace SyncService.EfComponents;
+namespace SyncService.EfComponents.Contexts;
 
 public class NeoContext : DbContext
 {
-    public DbSet<SimplifiedNearEarthObject> NearEarthObjects { get; set; } = null!;
+    public DbSet<DbNearEarthObject> NearEarthObjects { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

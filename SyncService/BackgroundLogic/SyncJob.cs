@@ -1,4 +1,5 @@
 ﻿using SyncService.EfComponents;
+using SyncService.EfComponents.Contexts;
 using SyncService.Extensions;
 using SyncService.Helpers;
 using SyncService.NeoApiComponents.Main;
@@ -27,7 +28,7 @@ public class SyncJob
         foreach (var obj in actualResponseObjects)
         {
             var id = obj.Id;
-            var objForDb = obj.Simplify();
+            var objForDb = obj.ToDbNearEarthObject();
             
             if (!dbObjectsIds.Contains(id))
                 await _neoContext.NearEarthObjects.AddAsync(objForDb, cancellationToken);
