@@ -5,23 +5,6 @@ namespace SyncService. Extensions;
 
 public static class NearEarthObjectExtensions
 {
-    public static SyncDateTimes PrepareFullLinkedDataForDb(this NearEarthObject obj)
-    {
-        var dbNearEarthObject = obj.ToDbNearEarthObject();
-
-        var toReturn = new SyncDateTimes
-        {
-            Id = Guid.NewGuid(),
-            SyncTime = DateTime.Now,
-            NearEarthObjectId = dbNearEarthObject.Id,
-            NearEarthObject = dbNearEarthObject
-        };
-        dbNearEarthObject.SyncDateTimeId =  toReturn.Id;
-        dbNearEarthObject.SyncDateTime = toReturn;
-        
-        return toReturn;
-    }
-    
     public static DbNearEarthObject ToDbNearEarthObject(this NearEarthObject obj)
     {
         var closeApproachData = obj.ToDbCloseApproachData();

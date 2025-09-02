@@ -10,11 +10,7 @@ public class DbNearEarthObject
     public double EstimatedDiameterMax { get; set; }
     public bool IsPotentiallyHazardous { get; set; }
     public Guid CloseApproachDataId { get; set; }
-    public Guid SyncDateTimeId { get; set; }
     
     [NotMapped]
     public DbCloseApproachData CloseApproachData { get; set; }
-    
-    [NotMapped]
-    public SyncDateTimes SyncDateTime { get; set; }
 }
