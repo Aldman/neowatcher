@@ -1,4 +1,6 @@
-﻿namespace SyncService.EfComponents.DbSets;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SyncService.EfComponents.DbSets;
 
 public class DbCloseApproachData
 {
@@ -8,4 +10,8 @@ public class DbCloseApproachData
     public double RelativeVelocityKmh { get; set; }
     public double MissDistanceKm { get; set; }
     public string? OrbitingBody { get; set; }
+    public string NearEarthObjectId { get; set; }
+    
+    [NotMapped]
+    public DbNearEarthObject NearEarthObject { get; set; }
 }

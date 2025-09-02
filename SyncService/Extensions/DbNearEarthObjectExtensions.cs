@@ -12,5 +12,7 @@ public static class DbNearEarthObjectExtensions
         current.IsPotentiallyHazardous = other.IsPotentiallyHazardous;
         current.CloseApproachDataId = other.CloseApproachDataId;
         current.CloseApproachData = other.CloseApproachData;
+        current.SyncDateTime = other.SyncDateTime;
+        current.SyncDateTimeId = other.SyncDateTimeId;
     }
 }
