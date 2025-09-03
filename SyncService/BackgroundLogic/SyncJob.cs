@@ -39,8 +39,9 @@ public class SyncJob
             else
             {
                 await _neoContext.NearEarthObjects.AddAsync(objForDb, cancellationToken);
-                await _neoContext.CloseApproachData.AddAsync(objForDb.CloseApproachData, cancellationToken);
             }
+
+            await _neoContext.CloseApproachData.AddAsync(objForDb.CloseApproachData, cancellationToken);
         }
 
         await _neoContext.SyncDateTimes.AddAsync(syncDateEntity, cancellationToken);
