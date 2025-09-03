@@ -13,4 +13,6 @@ public class DbNearEarthObject
     
     [NotMapped]
     public DbCloseApproachData CloseApproachData { get; set; }
+    
+    public List<SyncDateTimes> SyncDateTimes { get; set; } = new();
 }

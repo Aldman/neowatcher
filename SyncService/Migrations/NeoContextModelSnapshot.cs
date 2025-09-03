@@ -22,6 +22,21 @@ namespace SyncService.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("DbNearEarthObjectSyncDateTimes", b =>
+                {
+                    b.Property<string>("NearEarthObjectsId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SyncDateTimesId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("NearEarthObjectsId", "SyncDateTimesId");
+
+                    b.HasIndex("SyncDateTimesId");
+
+                    b.ToTable("DbNearEarthObjectSyncDateTimes");
+                });
+
             modelBuilder.Entity("SyncService.EfComponents.DbSets.DbCloseApproachData", b =>
                 {
                     b.Property<Guid>("Id")
@@ -73,12 +88,7 @@ namespace SyncService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("SyncDateTimesId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("SyncDateTimesId");
 
                     b.ToTable("NearEarthObjects");
                 });
@@ -97,16 +107,19 @@ namespace SyncService.Migrations
                     b.ToTable("SyncDateTimes");
                 });
 
-            modelBuilder.Entity("SyncService.EfComponents.DbSets.DbNearEarthObject", b =>
+            modelBuilder.Entity("DbNearEarthObjectSyncDateTimes", b =>
                 {
-                    b.HasOne("SyncService.EfComponents.DbSets.SyncDateTimes", null)
-                        .WithMany("NearEarthObjects")
-                        .HasForeignKey("SyncDateTimesId");
-                });
+                    b.HasOne("SyncService.EfComponents.DbSets.DbNearEarthObject", null)
+                        .WithMany()
+                        .HasForeignKey("NearEarthObjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-            modelBuilder.Entity("SyncService.EfComponents.DbSets.SyncDateTimes", b =>
-                {
-                    b.Navigation("NearEarthObjects");
+                    b.HasOne("SyncService.EfComponents.DbSets.SyncDateTimes", null)
+                        .WithMany()
+                        .HasForeignKey("SyncDateTimesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

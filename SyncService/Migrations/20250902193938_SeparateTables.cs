@@ -34,12 +34,6 @@ namespace SyncService.Migrations
                 nullable: false,
                 defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
-            migrationBuilder.AddColumn<Guid>(
-                name: "SyncDateTimesId",
-                table: "NearEarthObjects",
-                type: "uuid",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "CloseApproachData",
                 columns: table => new
@@ -69,42 +63,50 @@ namespace SyncService.Migrations
                     table.PrimaryKey("PK_SyncDateTimes", x => x.Id);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_NearEarthObjects_SyncDateTimesId",
-                table: "NearEarthObjects",
-                column: "SyncDateTimesId");
+            migrationBuilder.CreateTable(
+                name: "DbNearEarthObjectSyncDateTimes",
+                columns: table => new
+                {
+                    NearEarthObjectsId = table.Column<string>(type: "text", nullable: false),
+                    SyncDateTimesId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DbNearEarthObjectSyncDateTimes", x => new { x.NearEarthObjectsId, x.SyncDateTimesId });
+                    table.ForeignKey(
+                        name: "FK_DbNearEarthObjectSyncDateTimes_NearEarthObjects_NearEarthOb~",
+                        column: x => x.NearEarthObjectsId,
+                        principalTable: "NearEarthObjects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_DbNearEarthObjectSyncDateTimes_SyncDateTimes_SyncDateTimesId",
+                        column: x => x.SyncDateTimesId,
+                        principalTable: "SyncDateTimes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_NearEarthObjects_SyncDateTimes_SyncDateTimesId",
-                table: "NearEarthObjects",
-                column: "SyncDateTimesId",
-                principalTable: "SyncDateTimes",
-                principalColumn: "Id");
+            migrationBuilder.CreateIndex(
+                name: "IX_DbNearEarthObjectSyncDateTimes_SyncDateTimesId",
+                table: "DbNearEarthObjectSyncDateTimes",
+                column: "SyncDateTimesId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_NearEarthObjects_SyncDateTimes_SyncDateTimesId",
-                table: "NearEarthObjects");
-
             migrationBuilder.DropTable(
                 name: "CloseApproachData");
 
             migrationBuilder.DropTable(
-                name: "SyncDateTimes");
+                name: "DbNearEarthObjectSyncDateTimes");
 
-            migrationBuilder.DropIndex(
-                name: "IX_NearEarthObjects_SyncDateTimesId",
-                table: "NearEarthObjects");
+            migrationBuilder.DropTable(
+                name: "SyncDateTimes");
 
             migrationBuilder.DropColumn(
                 name: "CloseApproachDataId",
-                table: "NearEarthObjects");
-
-            migrationBuilder.DropColumn(
-                name: "SyncDateTimesId",
                 table: "NearEarthObjects");
 
             migrationBuilder.AddColumn<DateTime>(

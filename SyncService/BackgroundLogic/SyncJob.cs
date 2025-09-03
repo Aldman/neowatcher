@@ -1,4 +1,5 @@
 ﻿using SyncService.EfComponents;
+using SyncService.EfComponents.DbSets;
 using SyncService.Extensions;
 using SyncService.Helpers;
 using SyncService.NeoApiComponents.Main;
@@ -22,20 +23,27 @@ public class SyncJob
 
         var actualResponseObjects = neoResponse.NearEarthObjects[DateTime.Today];
         var dbObjectsIds = GetCurrentDbObjectsIds();
-        await RemoveExtraObjectsFromDb(actualResponseObjects, dbObjectsIds);
+        var syncDateEntity = new SyncDateTimes();
 
         foreach (var obj in actualResponseObjects)
         {
             var id = obj.Id;
             var objForDb = obj.ToDbNearEarthObject();
+            syncDateEntity.NearEarthObjects.Add(objForDb);
             
-            if (!dbObjectsIds.Contains(id))
+            if (dbObjectsIds.Contains(id))
+            {
+                var dbObj = await _neoContext.NearEarthObjects.FindAsync(id);
+                dbObj?.Change(objForDb);
+            }
+            else
+            {
                 await _neoContext.NearEarthObjects.AddAsync(objForDb, cancellationToken);
-            
-            var dbObj = await _neoContext.NearEarthObjects.FindAsync(id);
-            dbObj?.Change(objForDb);
+                await _neoContext.CloseApproachData.AddAsync(objForDb.CloseApproachData, cancellationToken);
+            }
         }
 
+        await _neoContext.SyncDateTimes.AddAsync(syncDateEntity, cancellationToken);
         await _neoContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -53,20 +61,5 @@ public class SyncJob
         return _neoContext.NearEarthObjects
             .Select(x => x.Id)
             .ToHashSet();
-    }
-
-    private async Task RemoveExtraObjectsFromDb(List<NearEarthObject> actualResponseObjects, HashSet<string> dbObjectsIds)
-    {
-        var responseIds = actualResponseObjects
-            .Select(x => x.Id)
-            .ToHashSet();
-
-        var extraDbIds = dbObjectsIds.Except(responseIds);
-        foreach (var extraDbId in extraDbIds)
-        {
-            var extra = await _neoContext.NearEarthObjects.FindAsync(extraDbId);
-            if (extra != null)
-                _neoContext.NearEarthObjects.Remove(extra);
-        }
     }
 }

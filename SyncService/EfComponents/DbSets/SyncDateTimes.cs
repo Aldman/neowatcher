@@ -2,7 +2,8 @@
 
 public class SyncDateTimes
 {
-    public Guid Id { get; set; }
-    public DateTime SyncTime { get; set; }
-    public List <DbNearEarthObject> NearEarthObjects { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public DateTime SyncTime { get; set; } =  DateTime.Now;
+    
+    public List <DbNearEarthObject> NearEarthObjects { get; set; }  = new();
 }
