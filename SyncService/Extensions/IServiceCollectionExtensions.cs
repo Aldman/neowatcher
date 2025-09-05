@@ -9,6 +9,7 @@ public static class IServiceCollectionExtensions
     {
         services.AddDbContext<NeoContext>();
         services.AddScoped<HttpClient>();
+        services.AddScoped<INasaApiClient, NasaApiClient>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
     }

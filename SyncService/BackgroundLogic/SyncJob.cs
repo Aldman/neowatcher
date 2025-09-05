@@ -8,18 +8,18 @@ namespace SyncService.BackgroundLogic;
 
 public class SyncJob
 {
-    private readonly HttpClient _httpClient;
+    private readonly INasaApiClient _apiClient;
     private readonly NeoContext _neoContext;
 
-    public SyncJob(HttpClient httpClient, NeoContext neoContext)
+    public SyncJob(INasaApiClient apiClient, NeoContext neoContext)
     {
-        _httpClient = httpClient;
+        _apiClient = apiClient;
         _neoContext = neoContext;
     }
 
     public async Task UpdateDataOfNasaAsync(CancellationToken cancellationToken = default)
     {
-        var neoResponse = await GetNeoResponseByApi(cancellationToken);
+        var neoResponse = await _apiClient.GetNeoResponseByApi(cancellationToken);
 
         var actualResponseObjects = neoResponse.NearEarthObjects[DateTime.Today];
         var dbObjectsIds = GetCurrentDbObjectsIds();
@@ -46,15 +46,6 @@ public class SyncJob
 
         await _neoContext.SyncDateTimes.AddAsync(syncDateEntity, cancellationToken);
         await _neoContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task<NeoResponse?> GetNeoResponseByApi(CancellationToken cancellationToken)
-    {
-        var apiLink = NasaApiLinkBuilder.GetLinkWithOnlyEndDate(endDate: DateTime.Now);
-        var response = await _httpClient.GetAsync(apiLink, cancellationToken);
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        
-        return json.ToNeoResponse();
     }
     
     private HashSet<string> GetCurrentDbObjectsIds()
