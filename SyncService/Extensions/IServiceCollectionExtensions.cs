@@ -1,6 +1,7 @@
 ﻿using SyncService.BackgroundLogic;
 using SyncService.EfComponents;
 using SyncService.EfComponents.Repository;
+using SyncService.NasaApi.Client;
 
 namespace SyncService.Extensions;
 

@@ -1,6 +1,6 @@
 ﻿using SyncService.NeoApiComponents.Main;
 
-namespace SyncService;
+namespace SyncService.NasaApi.Client;
 
 public interface INasaApiClient
 {

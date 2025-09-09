@@ -2,7 +2,7 @@
 using SyncService.Helpers;
 using SyncService.NeoApiComponents.Main;
 
-namespace SyncService;
+namespace SyncService.NasaApi.Client;
 
 public class NasaApiClient : INasaApiClient
 {
