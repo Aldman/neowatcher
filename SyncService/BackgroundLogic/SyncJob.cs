@@ -1,66 +1,25 @@
-﻿using SyncService.EfComponents;
-using SyncService.EfComponents.DbSets;
-using SyncService.Extensions;
+﻿using SyncService.EfComponents.Repository;
 using SyncService.Helpers;
-using SyncService.NeoApiComponents.Main;
+using SyncService.NasaApi.Client;
 
 namespace SyncService.BackgroundLogic;
 
 public class SyncJob
 {
-    private readonly HttpClient _httpClient;
-    private readonly NeoContext _neoContext;
+    private readonly INasaApiClient _apiClient;
+    private readonly INeoRepository _neoRepository;
 
-    public SyncJob(HttpClient httpClient, NeoContext neoContext)
+    public SyncJob(INasaApiClient apiClient, INeoRepository neoRepository)
     {
-        _httpClient = httpClient;
-        _neoContext = neoContext;
+        _apiClient = apiClient;
+        _neoRepository = neoRepository;
     }
 
     public async Task UpdateDataOfNasaAsync(CancellationToken cancellationToken = default)
     {
-        var neoResponse = await GetNeoResponseByApi(cancellationToken);
+        var neoResponse = await _apiClient.GetNeoResponseByApi(cancellationToken);
 
-        var actualResponseObjects = neoResponse.NearEarthObjects[DateTime.Today];
-        var dbObjectsIds = GetCurrentDbObjectsIds();
-        var syncDateEntity = new SyncDateTimes();
-
-        foreach (var obj in actualResponseObjects)
-        {
-            var id = obj.Id;
-            var objForDb = obj.ToDbNearEarthObject();
-            syncDateEntity.NearEarthObjects.Add(objForDb);
-            
-            if (dbObjectsIds.Contains(id))
-            {
-                var dbObj = await _neoContext.NearEarthObjects.FindAsync(id);
-                dbObj?.Change(objForDb);
-            }
-            else
-            {
-                await _neoContext.NearEarthObjects.AddAsync(objForDb, cancellationToken);
-            }
-
-            await _neoContext.CloseApproachData.AddAsync(objForDb.CloseApproachData, cancellationToken);
-        }
-
-        await _neoContext.SyncDateTimes.AddAsync(syncDateEntity, cancellationToken);
-        await _neoContext.SaveChangesAsync(cancellationToken);
-    }
-
-    private async Task<NeoResponse?> GetNeoResponseByApi(CancellationToken cancellationToken)
-    {
-        var apiLink = NasaApiLinkBuilder.GetLinkWithOnlyEndDate(endDate: DateTime.Now);
-        var response = await _httpClient.GetAsync(apiLink, cancellationToken);
-        var json = await response.Content.ReadAsStringAsync(cancellationToken);
-        
-        return json.ToNeoResponse();
-    }
-    
-    private HashSet<string> GetCurrentDbObjectsIds()
-    {
-        return _neoContext.NearEarthObjects
-            .Select(x => x.Id)
-            .ToHashSet();
+        var dto = ApiToDbSetsDataMapper.MapAndLink(neoResponse);
+        await _neoRepository.SaveOrUpdate(dto, cancellationToken);
     }
 }

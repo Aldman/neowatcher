@@ -10,7 +10,15 @@ public static class DbNearEarthObjectExtensions
         current.EstimatedDiameterMin = other.EstimatedDiameterMin;
         current.EstimatedDiameterMax = other.EstimatedDiameterMax;
         current.IsPotentiallyHazardous = other.IsPotentiallyHazardous;
-        current.CloseApproachDataId = other.CloseApproachDataId;
         current.CloseApproachData = other.CloseApproachData;
+
+        var currentData = current.CloseApproachData;
+        var otherData = other.CloseApproachData;
+        
+        currentData.CloseApproachDate = otherData.CloseApproachDate;
+        currentData.EpochDateCloseApproach = otherData.EpochDateCloseApproach;
+        currentData.RelativeVelocityKmh = otherData.RelativeVelocityKmh;
+        currentData.MissDistanceKm = otherData.MissDistanceKm;
+        currentData.OrbitingBody = otherData.OrbitingBody;
     }
 }
