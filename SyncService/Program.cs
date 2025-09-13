@@ -8,7 +8,7 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Debug("Создание билдера");
-    var builder = Host.CreateApplicationBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
     
     Log.Debug("Инициализация сервисов");
     builder.Services.Initialize();
@@ -16,9 +16,9 @@ try
         .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services));
 
-    var host = builder.Build();
+    var app = builder.Build();
     Log.Information("Запуск приложения");
-    host.Run();
+    app.Run();
 }
 catch (Exception ex)
 {
