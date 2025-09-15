@@ -1,4 +1,7 @@
-﻿using SyncService.BackgroundLogic;
+﻿using System.ComponentModel;
+using System.Text.Json.Serialization;
+using SyncService.Api.NeoWatcher.Swagger;
+using SyncService.BackgroundLogic;
 using SyncService.EfComponents;
 using SyncService.EfComponents.Repository;
 using SyncService.NasaApi.Client;
@@ -15,8 +18,15 @@ public static class IServiceCollectionExtensions
         services.AddScoped<INeoRepository, NeoRepository>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
-        services.AddControllers();
+        services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(c =>
+        {
+            c.SchemaFilter<EnumSchemaFilter>();
+        });
     }
 }
