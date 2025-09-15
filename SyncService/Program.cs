@@ -30,5 +30,6 @@ catch (Exception ex)
 }
 finally
 {
+    Log.Information(Environment.NewLine);
     Log.CloseAndFlush();
 }
