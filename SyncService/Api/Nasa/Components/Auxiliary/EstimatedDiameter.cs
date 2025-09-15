@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SyncService.Api.Nasa.Components.Auxiliary;
 
 namespace SyncService.NeoApiComponents;
 

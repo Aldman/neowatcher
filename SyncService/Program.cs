@@ -17,6 +17,8 @@ try
         .ReadFrom.Services(services));
 
     var app = builder.Build();
+    app.MapControllers();
+    
     Log.Information("Запуск приложения");
     app.Run();
 }

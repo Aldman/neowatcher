@@ -15,5 +15,6 @@ public static class IServiceCollectionExtensions
         services.AddScoped<INeoRepository, NeoRepository>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
+        services.AddControllers();
     }
 }
