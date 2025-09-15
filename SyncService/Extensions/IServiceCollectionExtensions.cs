@@ -16,5 +16,7 @@ public static class IServiceCollectionExtensions
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
         services.AddControllers();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
     }
 }

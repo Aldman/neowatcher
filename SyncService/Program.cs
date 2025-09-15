@@ -18,6 +18,8 @@ try
 
     var app = builder.Build();
     app.MapControllers();
+    app.UseSwagger();
+    app.UseSwaggerUI();
     
     Log.Information("Запуск приложения");
     app.Run();
