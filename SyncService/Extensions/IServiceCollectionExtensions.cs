@@ -1,5 +1,5 @@
-﻿using System.ComponentModel;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Models;
 using SyncService.Api.NeoWatcher.Swagger;
 using SyncService.BackgroundLogic;
 using SyncService.EfComponents;
@@ -27,6 +27,7 @@ public static class IServiceCollectionExtensions
         services.AddSwaggerGen(c =>
         {
             c.SchemaFilter<EnumSchemaFilter>();
+            c.MapType<DateTime>(() => new OpenApiSchema { Type = "string", Format = "date" });
         });
     }
 }
