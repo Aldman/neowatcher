@@ -20,6 +20,7 @@ public class NeoApiController : ControllerBase
     public async Task<IActionResult> GetStats([FromQuery] NeoFilterRequest filter,
         CancellationToken cancellationToken = default)
     {
+        NeoFilterRequestValidator.Validate(filter);
         var query = _neoRepository.GetFilteredQuery(filter);
 
         var grouped = await query
