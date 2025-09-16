@@ -12,6 +12,6 @@ public static class NeoFilterRequestValidator
             throw new ArgumentException("MaxDiameter must be greater than 0");
         
         if (request.MinDiameter is < 0)
-            throw new ArgumentException("MinDiameter should not be a negative ");
+            throw new ArgumentException("MinDiameter should not be negative ");
     }
 }

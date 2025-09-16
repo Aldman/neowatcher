@@ -1,5 +1,6 @@
 using Serilog;
 using SyncService.Extensions;
+using SyncService.Middlewares;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -20,6 +21,7 @@ try
     app.MapControllers();
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseExceptionHandling();
     
     Log.Information("Запуск приложения");
     app.Run();
