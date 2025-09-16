@@ -11,7 +11,5 @@ public class DbCloseApproachData
     public double MissDistanceKm { get; set; }
     public string? OrbitingBody { get; set; }
     public string NearEarthObjectId { get; set; }
-    
-    [NotMapped]
     public DbNearEarthObject NearEarthObject { get; set; }
 }
