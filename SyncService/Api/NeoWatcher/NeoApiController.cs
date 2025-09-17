@@ -17,6 +17,8 @@ public class NeoApiController : ControllerBase
     }
 
     [HttpGet("stats")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetStats([FromQuery] NeoFilterRequest filter,
         CancellationToken cancellationToken = default)
     {

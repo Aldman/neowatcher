@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Net.Mime;
+using Serilog;
 
 namespace SyncService.Middlewares;
 
@@ -26,7 +28,7 @@ public class ExceptionHandlingMiddleware
                 _ => (HttpStatusCode.InternalServerError, "Server error")
             };
             
-            context.Response.ContentType = "application/json";
+            context.Response.ContentType = MediaTypeNames.Application.Json;
             context.Response.StatusCode = (int)status;
             
             var payload = new
