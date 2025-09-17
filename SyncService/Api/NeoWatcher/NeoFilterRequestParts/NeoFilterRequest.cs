@@ -8,5 +8,5 @@ public class NeoFilterRequest
     public double? MinDiameter { get; set; }
     public double? MaxDiameter { get; set; }
     public SortBy? SortBy { get; set; }
-    public SortDirections? SortDir { get; set; }
+    public SortDirections? SortDirection { get; set; }
 }
