@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
 using SyncService.EfComponents.DbSets;
 using SyncService.EfComponents.Repository;
@@ -11,10 +13,16 @@ namespace SyncService.Api.NeoWatcher;
 public class NeoApiController : ControllerBase
 {
     private readonly INeoRepository _neoRepository;
+    private readonly IMemoryCache _memoryCache;
+    private readonly MemoryCacheEntryOptions _cacheOptions = new()
+    {
+        SlidingExpiration = TimeSpan.FromMinutes(10)
+    };
 
-    public NeoApiController(INeoRepository neoRepository)
+    public NeoApiController(INeoRepository neoRepository, IMemoryCache memoryCache)
     {
         _neoRepository = neoRepository;
+        _memoryCache = memoryCache;
     }
 
     [HttpGet("stats")]
@@ -24,15 +32,19 @@ public class NeoApiController : ControllerBase
         CancellationToken cancellationToken = default)
     {
         NeoFilterRequestValidator.Validate(filter);
+        var filterKey = JsonConvert.SerializeObject(filter);
+        if (_memoryCache.TryGetValue(filterKey, out var response))
+            return Ok(response);
         
         var query = _neoRepository.GetFilteredQuery(filter);
         var grouped = await GroupByDateAsync(query, cancellationToken);
 
-        if (!filter.SortBy.HasValue)
-            return Ok(grouped);
-
-        var sorted = Sort(filter, grouped);
-        return Ok(sorted);
+        IEnumerable<NeoStatResponse> toReturn = filter.SortBy.HasValue
+            ? Sort(filter, grouped)
+            : grouped;
+        
+        _memoryCache.Set(filterKey, toReturn, _cacheOptions);
+        return Ok(toReturn);
     }
 
     private static async Task<List<NeoStatResponse>> GroupByDateAsync(

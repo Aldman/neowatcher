@@ -18,12 +18,14 @@ public static class IServiceCollectionExtensions
         services.AddScoped<INeoRepository, NeoRepository>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
+        services.AddEndpointsApiExplorer();
+        services.AddMemoryCache();
+        
         services.AddControllers()
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-        services.AddEndpointsApiExplorer();
         services.AddSwaggerGen(c =>
         {
             c.SchemaFilter<EnumSchemaFilter>();
