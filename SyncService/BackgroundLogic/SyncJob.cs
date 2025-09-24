@@ -20,6 +20,7 @@ public class SyncJob
         var neoResponse = await _apiClient.GetNeoResponseByApi(cancellationToken);
 
         var dto = ApiToDbSetsDataMapper.MapAndLink(neoResponse);
-        await _neoRepository.SaveOrUpdate(dto, cancellationToken);
+        // todo:
+        // await _neoRepository.SaveOrUpdate(dto, cancellationToken);
     }
 }

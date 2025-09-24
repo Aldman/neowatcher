@@ -22,4 +22,12 @@ public class NeoContext : DbContext
         
         optionsBuilder.UseNpgsql(connectionString);
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<DbNearEarthObject>()
+            .HasOne(x => x.CloseApproachData)
+            .WithOne(x => x.NearEarthObject)
+            .HasForeignKey<DbNearEarthObject>(x => x.CloseApproachDataId);
+    }
 }

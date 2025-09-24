@@ -1,4 +1,5 @@
-﻿using SyncService.EfComponents.DbSets;
+﻿using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
+using SyncService.EfComponents.DbSets;
 using SyncService.Extensions;
 
 namespace SyncService.EfComponents.Repository;
@@ -34,7 +35,25 @@ public class NeoRepository : INeoRepository
         
         await _neoContext.SaveChangesAsync(cancellationToken);
     }
-    
+
+    public IQueryable<DbNearEarthObject> GetFilteredQuery(NeoFilterRequest filter)
+    {
+        var query = _neoContext.NearEarthObjects.AsQueryable();
+
+        if (filter.From.HasValue)
+            query = query.Where(x => x.CloseApproachData.CloseApproachDate >= filter.From);
+        if (filter.To.HasValue)
+            query = query.Where(x => x.CloseApproachData.CloseApproachDate <= filter.To);
+        if (filter.IsHazardous.HasValue)
+            query = query.Where(x => x.IsPotentiallyHazardous == filter.IsHazardous);
+        if (filter.MinDiameter.HasValue)
+            query = query.Where(x => x.EstimatedDiameterMax >= filter.MinDiameter);
+        if (filter.MaxDiameter.HasValue)
+            query = query.Where(x => x.EstimatedDiameterMin <= filter.MaxDiameter);
+
+        return query;
+    }
+
     private HashSet<string> GetCurrentDbObjectsIds()
     {
         return _neoContext.NearEarthObjects
