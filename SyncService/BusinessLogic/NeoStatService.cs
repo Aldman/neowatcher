@@ -3,6 +3,7 @@ using SyncService.Api.NeoWatcher;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
 using SyncService.EfComponents.DbSets;
 using SyncService.EfComponents.Repository;
+using SyncService.NeoWatcherApi.Controllers.NeoStats;
 
 namespace SyncService.BusinessLogic;
 
@@ -15,7 +16,7 @@ public class NeoStatService : INeoStatService
         _neoRepository = neoRepository;
     }
     
-    public async Task<IEnumerable<NeoStatResponse>> GetFilteredStatsAsync(
+    public async Task<IEnumerable<NeoStatsResponse>> GetFilteredStatsAsync(
         NeoFilterRequest filter,
         CancellationToken cancellationToken = default)
     {
@@ -27,14 +28,14 @@ public class NeoStatService : INeoStatService
             : grouped;
     }
     
-    private static async Task<List<NeoStatResponse>> GroupByDateAsync(
+    private static async Task<List<NeoStatsResponse>> GroupByDateAsync(
         IQueryable<DbNearEarthObject> query,
         CancellationToken cancellationToken = default) =>
         
         await query
             .Include(x => x.CloseApproachData)
             .GroupBy(x => x.CloseApproachData.CloseApproachDate.Date)
-            .Select(g => new NeoStatResponse
+            .Select(g => new NeoStatsResponse
             {
                 Date = g.Key,
                 ObjectCount = g.Count(),
@@ -44,7 +45,7 @@ public class NeoStatService : INeoStatService
             })
             .ToListAsync(cancellationToken);
     
-    private static IOrderedEnumerable<NeoStatResponse> Sort(NeoFilterRequest filter, List<NeoStatResponse> grouped) =>
+    private static IOrderedEnumerable<NeoStatsResponse> Sort(NeoFilterRequest filter, List<NeoStatsResponse> grouped) =>
         filter.SortBy switch
         {
             SortBy.Mass => filter.SortDirection == SortDirections.Desc
