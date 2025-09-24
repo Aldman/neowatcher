@@ -2,6 +2,7 @@
 using Microsoft.OpenApi.Models;
 using SyncService.Api.NeoWatcher.Swagger;
 using SyncService.BackgroundLogic;
+using SyncService.BusinessLogic;
 using SyncService.EfComponents;
 using SyncService.EfComponents.Repository;
 using SyncService.NasaApi.Client;
@@ -16,6 +17,7 @@ public static class IServiceCollectionExtensions
         services.AddScoped<HttpClient>();
         services.AddScoped<INasaApiClient, NasaApiClient>();
         services.AddScoped<INeoRepository, NeoRepository>();
+        services.AddScoped<INeoStatService, NeoStatService>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
         services.AddEndpointsApiExplorer();
