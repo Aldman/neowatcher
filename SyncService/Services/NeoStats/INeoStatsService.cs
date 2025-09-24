@@ -1,10 +1,9 @@
-﻿using SyncService.Api.NeoWatcher;
-using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
+﻿using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
 using SyncService.NeoWatcherApi.Controllers.NeoStats;
 
-namespace SyncService.BusinessLogic;
+namespace SyncService.Services.NeoStats;
 
-public interface INeoStatService
+public interface INeoStatsService
 {
     Task <IEnumerable<NeoStatsResponse>> GetFilteredStatsAsync(NeoFilterRequest filter, CancellationToken cancellationToken);
 }

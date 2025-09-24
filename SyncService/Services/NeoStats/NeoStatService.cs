@@ -1,17 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SyncService.Api.NeoWatcher;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
 using SyncService.EfComponents.DbSets;
 using SyncService.EfComponents.Repository;
 using SyncService.NeoWatcherApi.Controllers.NeoStats;
 
-namespace SyncService.BusinessLogic;
+namespace SyncService.Services.NeoStats;
 
-public class NeoStatService : INeoStatService
+public class NeoStatsService : INeoStatsService
 {
     private readonly INeoRepository _neoRepository;
 
-    public NeoStatService(INeoRepository neoRepository)
+    public NeoStatsService(INeoRepository neoRepository)
     {
         _neoRepository = neoRepository;
     }

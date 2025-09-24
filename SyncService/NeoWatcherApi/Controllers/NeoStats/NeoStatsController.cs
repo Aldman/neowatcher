@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
-using SyncService.BusinessLogic;
+using SyncService.Services.NeoStats;
 
 namespace SyncService.NeoWatcherApi.Controllers.NeoStats;
 
@@ -10,17 +10,18 @@ namespace SyncService.NeoWatcherApi.Controllers.NeoStats;
 [Route("neo")]
 public class NeoApiController : NeoControllerBase
 {
-    private readonly INeoStatService _neoStatService;
+    private readonly INeoStatsService _neoStatsService;
 
-    public NeoApiController(IMemoryCache memoryCache, INeoStatService neoStatService) : base(memoryCache)
+    public NeoApiController(IMemoryCache memoryCache, INeoStatsService neoStatsService) : base(memoryCache)
     {
-        _neoStatService = neoStatService;
+        _neoStatsService = neoStatsService;
     }
 
     [HttpGet("stats")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetStats([FromQuery] NeoFilterRequest filter,
+    public async Task<IActionResult> GetStats(
+        [FromQuery] NeoFilterRequest filter,
         CancellationToken cancellationToken = default)
     {
         NeoFilterRequestValidator.Validate(filter);
@@ -28,7 +29,7 @@ public class NeoApiController : NeoControllerBase
         if (MemoryCache.TryGetValue(filterKey, out var response))
             return Ok(response);
         
-        var result = await _neoStatService.GetFilteredStatsAsync(filter, cancellationToken);
+        var result = await _neoStatsService.GetFilteredStatsAsync(filter, cancellationToken);
         
         MemoryCache.Set(filterKey, result, CacheOptions);
         return Ok(result);
