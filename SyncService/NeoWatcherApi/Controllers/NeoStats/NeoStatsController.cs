@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
+using SyncService.NeoWatcherApi.Controllers.NeoStats.NeoFilterRequestParts;
 using SyncService.Services.NeoStats;
 
 namespace SyncService.NeoWatcherApi.Controllers.NeoStats;

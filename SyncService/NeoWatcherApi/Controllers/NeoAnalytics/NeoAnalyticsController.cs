@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using SyncService.Constants;
 using SyncService.Services.NeoAnalytics;
 
 namespace SyncService.NeoWatcherApi.Controllers.NeoAnalytics;
@@ -14,4 +15,43 @@ public class NeoAnalyticsController : NeoControllerBase
     {
         _analyticsService = analyticsService;
     }
+
+    [HttpGet("byDateRange")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
+    public async Task<IActionResult> GetAnalyticsByDateRangeAsync(
+        DateTime from,
+        DateTime to,
+        CancellationToken cancellationToken = default)
+    {
+        if (IsRangeInvalid(from, to, out var validationProblem)) 
+            return validationProblem!;
+        
+        var filterKey = GetCacheKey(from, to);
+        if (MemoryCache.TryGetValue(filterKey, out var response))
+            return Ok(response);
+
+        var results = await _analyticsService
+            .GetDateRangeAnalyticsAsync(from, to, cancellationToken);
+        
+        MemoryCache.Set(filterKey, results, CacheOptions);
+        return Ok(results);
+    }
+
+    private bool IsRangeInvalid(DateTime from, DateTime to, out IActionResult? validationProblem)
+    {
+        if (from >= to)
+        {
+            validationProblem = ValidationProblem(
+                detail: CommonExceptionTexts.FromMoreThanTo,
+                statusCode: StatusCodes.Status416RangeNotSatisfiable
+            );
+            return true;
+        }
+
+        validationProblem = null;
+        return false;
+    }
+
+    private static string GetCacheKey(DateTime from, DateTime to) => $"{from} : {to}";
 }
