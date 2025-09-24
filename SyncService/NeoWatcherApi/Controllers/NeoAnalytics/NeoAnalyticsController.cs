@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using SyncService.Constants;
+using SyncService.Helpers;
 using SyncService.Services.NeoAnalytics;
 
 namespace SyncService.NeoWatcherApi.Controllers.NeoAnalytics;
@@ -27,7 +28,7 @@ public class NeoAnalyticsController : NeoControllerBase
         if (IsRangeInvalid(from, to, out var validationProblem)) 
             return validationProblem!;
         
-        var filterKey = GetCacheKey(from, to);
+        var filterKey = CacheKeyGenerator.Generate(from, to);
         if (MemoryCache.TryGetValue(filterKey, out var response))
             return Ok(response);
 
@@ -52,6 +53,4 @@ public class NeoAnalyticsController : NeoControllerBase
         validationProblem = null;
         return false;
     }
-
-    private static string GetCacheKey(DateTime from, DateTime to) => $"{from} : {to}";
 }

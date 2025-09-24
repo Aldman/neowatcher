@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
+using SyncService.Helpers;
 using SyncService.NeoWatcherApi.Controllers.NeoStats.NeoFilterRequestParts;
 using SyncService.Services.NeoStats;
 
@@ -26,7 +27,7 @@ public class NeoApiController : NeoControllerBase
         CancellationToken cancellationToken = default)
     {
         NeoFilterRequestValidator.Validate(filter);
-        var filterKey = JsonConvert.SerializeObject(filter);
+        var filterKey = CacheKeyGenerator.Generate(filter);
         if (MemoryCache.TryGetValue(filterKey, out var response))
             return Ok(response);
         
