@@ -68,4 +68,30 @@ public class NeoAnalyticsController : NeoControllerBase
         MemoryCache.Set(cacheKey, results, CacheOptions);
         return Ok(results);
     }
+    
+    [HttpGet("comparePeriods")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
+    public async Task<IActionResult> ComparePeriodsAsync(
+        DateTime period1Start,
+        DateTime period1End, 
+        DateTime period2Start, 
+        DateTime period2End, 
+        CancellationToken cancellationToken = default)
+    {
+        if (IsRangeInvalid(period1Start, period1End, out var validationProblem1)) 
+            return validationProblem1!;
+        if (IsRangeInvalid(period2Start, period2End, out var validationProblem2)) 
+            return validationProblem2!;
+        
+        var cacheKey = CacheKeyGenerator.Generate(period1Start, period1End, period2Start, period2End);
+        if (MemoryCache.TryGetValue(cacheKey, out var response))
+            return Ok(response);
+
+        var results = await _analyticsService
+            .ComparePeriodsAsync(period1Start, period1End, period2Start, period2End, cancellationToken);
+        
+        MemoryCache.Set(cacheKey, results, CacheOptions);
+        return Ok(results);
+    }
 }
