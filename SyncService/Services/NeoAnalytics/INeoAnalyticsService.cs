@@ -8,4 +8,6 @@ public interface INeoAnalyticsService
         DateTime from,
         DateTime to,
         CancellationToken cancellationToken);
+
+    public Task<IEnumerable<NeoHazardousAnalysisResponse>> GetHazardousAnalysisAsync(CancellationToken cancellationToken);
 }

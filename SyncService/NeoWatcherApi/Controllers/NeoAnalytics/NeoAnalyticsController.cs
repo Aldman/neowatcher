@@ -38,7 +38,7 @@ public class NeoAnalyticsController : NeoControllerBase
         MemoryCache.Set(cacheKey, results, CacheOptions);
         return Ok(results);
     }
-
+    
     private bool IsRangeInvalid(DateTime from, DateTime to, out IActionResult? validationProblem)
     {
         if (from >= to)
@@ -52,5 +52,20 @@ public class NeoAnalyticsController : NeoControllerBase
 
         validationProblem = null;
         return false;
+    }
+    
+    [HttpGet("hazardousAnalysis")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetHazardousAnalysisAsync(CancellationToken cancellationToken = default)
+    {
+        var cacheKey = CacheKeyGenerator.Generate();
+        if (MemoryCache.TryGetValue(cacheKey, out var response))
+            return Ok(response);
+
+        var results = await _analyticsService
+            .GetHazardousAnalysisAsync(cancellationToken);
+        
+        MemoryCache.Set(cacheKey, results, CacheOptions);
+        return Ok(results);
     }
 }

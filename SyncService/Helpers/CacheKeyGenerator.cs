@@ -5,6 +5,7 @@ namespace SyncService.Helpers;
 
 public static class CacheKeyGenerator
 {
+    public static string Generate() => "constQuery";
     public static string Generate(DateTime from, DateTime to) => $"{from} : {to}";
     public static string Generate(NeoFilterRequest request) => JsonConvert.SerializeObject(request);
 }

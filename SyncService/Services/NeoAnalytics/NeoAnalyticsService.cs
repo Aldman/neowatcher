@@ -35,4 +35,29 @@ public class NeoAnalyticsService : INeoAnalyticsService
             })
             .ToListAsync(cancellationToken);
     }
+    
+    public async Task<IEnumerable<NeoHazardousAnalysisResponse>> GetHazardousAnalysisAsync(CancellationToken cancellationToken = default)
+    {
+        return await _neoRepository
+            .GetNearEarthObjectsAsQueryable()
+            .Include(x => x.CloseApproachData)
+            .GroupBy(x => new
+            {
+                x.CloseApproachData.CloseApproachDate.Year,
+                x.CloseApproachData.CloseApproachDate.Month,
+                IsHazardous = x.IsPotentiallyHazardous,
+            })
+            .Select(g => new NeoHazardousAnalysisResponse
+            {
+                Year = g.Key.Year,
+                Month = g.Key.Month,
+                IsHazardous = g.Key.IsHazardous,
+                Count = g.Count(),
+                AvgDiameter = g.Average(x => (x.EstimatedDiameterMax + x.EstimatedDiameterMin) / 2),
+                MaxDiameter = g.Max(x => x.EstimatedDiameterMax),
+                AvgVelocity = g.Average(x => x.CloseApproachData.RelativeVelocityKmh),
+                MinMissDistance = g.Min(x => x.CloseApproachData.MissDistanceKm)
+            })
+            .ToListAsync(cancellationToken);
+    }
 }
