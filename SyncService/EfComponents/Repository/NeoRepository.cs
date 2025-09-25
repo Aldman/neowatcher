@@ -54,6 +54,8 @@ public class NeoRepository : INeoRepository
         return query;
     }
 
+    public IQueryable<DbNearEarthObject> GetNearEarthObjectsAsQueryable() => _neoContext.NearEarthObjects.AsQueryable();
+
     private HashSet<string> GetCurrentDbObjectsIds()
     {
         return _neoContext.NearEarthObjects

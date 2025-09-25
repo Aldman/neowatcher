@@ -28,14 +28,14 @@ public class NeoAnalyticsController : NeoControllerBase
         if (IsRangeInvalid(from, to, out var validationProblem)) 
             return validationProblem!;
         
-        var filterKey = CacheKeyGenerator.Generate(from, to);
-        if (MemoryCache.TryGetValue(filterKey, out var response))
+        var cacheKey = CacheKeyGenerator.Generate(from, to);
+        if (MemoryCache.TryGetValue(cacheKey, out var response))
             return Ok(response);
 
         var results = await _analyticsService
             .GetDateRangeAnalyticsAsync(from, to, cancellationToken);
         
-        MemoryCache.Set(filterKey, results, CacheOptions);
+        MemoryCache.Set(cacheKey, results, CacheOptions);
         return Ok(results);
     }
 
