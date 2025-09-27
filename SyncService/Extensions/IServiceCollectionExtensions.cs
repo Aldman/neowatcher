@@ -5,8 +5,6 @@ using SyncService.BackgroundLogic;
 using SyncService.EfComponents;
 using SyncService.EfComponents.Repository;
 using SyncService.NasaApi.Client;
-using SyncService.Services.NeoAnalytics;
-using SyncService.Services.NeoStats;
 
 namespace SyncService.Extensions;
 
@@ -18,8 +16,6 @@ public static class IServiceCollectionExtensions
         services.AddScoped<HttpClient>();
         services.AddScoped<INasaApiClient, NasaApiClient>();
         services.AddScoped<INeoRepository, NeoRepository>();
-        services.AddScoped<INeoStatsService, NeoStatsService>();
-        services.AddScoped<INeoAnalyticsService, NeoAnalyticsService>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
         services.AddEndpointsApiExplorer();
