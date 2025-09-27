@@ -1,60 +1,40 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
 using SyncService.EfComponents.DbSets;
 using SyncService.EfComponents.Repository;
+using SyncService.NeoWatcherApi.Controllers.NeoStats;
 
-namespace SyncService.Api.NeoWatcher;
+namespace SyncService.Services.NeoStats;
 
-[ApiController]
-[Route("neo")]
-public class NeoApiController : ControllerBase
+public class NeoStatsService : INeoStatsService
 {
     private readonly INeoRepository _neoRepository;
-    private readonly IMemoryCache _memoryCache;
-    private readonly MemoryCacheEntryOptions _cacheOptions = new()
-    {
-        SlidingExpiration = TimeSpan.FromMinutes(10)
-    };
 
-    public NeoApiController(INeoRepository neoRepository, IMemoryCache memoryCache)
+    public NeoStatsService(INeoRepository neoRepository)
     {
         _neoRepository = neoRepository;
-        _memoryCache = memoryCache;
     }
-
-    [HttpGet("stats")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetStats([FromQuery] NeoFilterRequest filter,
+    
+    public async Task<IEnumerable<NeoStatsResponse>> GetFilteredStatsAsync(
+        NeoFilterRequest filter,
         CancellationToken cancellationToken = default)
     {
-        NeoFilterRequestValidator.Validate(filter);
-        var filterKey = JsonConvert.SerializeObject(filter);
-        if (_memoryCache.TryGetValue(filterKey, out var response))
-            return Ok(response);
-        
         var query = _neoRepository.GetFilteredQuery(filter);
         var grouped = await GroupByDateAsync(query, cancellationToken);
 
-        IEnumerable<NeoStatResponse> toReturn = filter.SortBy.HasValue
+        return filter.SortBy.HasValue
             ? Sort(filter, grouped)
             : grouped;
-        
-        _memoryCache.Set(filterKey, toReturn, _cacheOptions);
-        return Ok(toReturn);
     }
-
-    private static async Task<List<NeoStatResponse>> GroupByDateAsync(
+    
+    private static async Task<List<NeoStatsResponse>> GroupByDateAsync(
         IQueryable<DbNearEarthObject> query,
         CancellationToken cancellationToken = default) =>
         
         await query
             .Include(x => x.CloseApproachData)
             .GroupBy(x => x.CloseApproachData.CloseApproachDate.Date)
-            .Select(g => new NeoStatResponse
+            .Select(g => new NeoStatsResponse
             {
                 Date = g.Key,
                 ObjectCount = g.Count(),
@@ -64,7 +44,7 @@ public class NeoApiController : ControllerBase
             })
             .ToListAsync(cancellationToken);
     
-    private static IOrderedEnumerable<NeoStatResponse> Sort(NeoFilterRequest filter, List<NeoStatResponse> grouped) =>
+    private static IOrderedEnumerable<NeoStatsResponse> Sort(NeoFilterRequest filter, List<NeoStatsResponse> grouped) =>
         filter.SortBy switch
         {
             SortBy.Mass => filter.SortDirection == SortDirections.Desc

@@ -1,6 +1,6 @@
-﻿namespace SyncService.Api.NeoWatcher;
+﻿namespace SyncService.NeoWatcherApi.Controllers.NeoStats;
 
-public class NeoStatResponse
+public class NeoStatsResponse
 {
     public DateTime Date { get; set; }
     public int ObjectCount { get; set; }

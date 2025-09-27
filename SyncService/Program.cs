@@ -18,10 +18,7 @@ try
         .ReadFrom.Services(services));
 
     var app = builder.Build();
-    app.MapControllers();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.UseExceptionHandling();
+    app.Initialize();
     
     Log.Information("Запуск приложения");
     app.Run();
