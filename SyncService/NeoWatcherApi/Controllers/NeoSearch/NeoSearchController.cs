@@ -19,10 +19,13 @@ public class NeoSearchController : NeoControllerBase
 
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SearchAsync(
         [FromQuery] NeoSearchRequest request,
         CancellationToken cancellationToken = default)
     {
+        NeoSearchRequestValidator.Validate(request);
+        
         var cacheKey = CacheKeyGenerator.Generate(request);
         if (MemoryCache.TryGetValue(cacheKey, out var response))
             return Ok(response);

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
 using SyncService.Helpers;
 using SyncService.NeoWatcherApi.Controllers.NeoStats.NeoFilterRequestParts;
@@ -10,11 +9,11 @@ namespace SyncService.NeoWatcherApi.Controllers.NeoStats;
 
 [ApiController]
 [Route("neo")]
-public class NeoApiController : NeoControllerBase
+public class NeoStatsController : NeoControllerBase
 {
     private readonly INeoStatsService _neoStatsService;
 
-    public NeoApiController(IMemoryCache memoryCache, INeoStatsService neoStatsService) : base(memoryCache)
+    public NeoStatsController(IMemoryCache memoryCache, INeoStatsService neoStatsService) : base(memoryCache)
     {
         _neoStatsService = neoStatsService;
     }

@@ -1,15 +1,14 @@
-﻿using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
-using SyncService.Constants;
+﻿using SyncService.Constants;
+using SyncService.DTOs.NeoSearch;
 
-namespace SyncService.NeoWatcherApi.Controllers.NeoStats.NeoFilterRequestParts;
+namespace SyncService.NeoWatcherApi.Controllers.NeoSearch;
 
-public static class NeoFilterRequestValidator
+public static class NeoSearchRequestValidator
 {
-    public static void Validate(NeoFilterRequest request)
+    public static void Validate(NeoSearchRequest request)
     {
-        if (request is { From: not null, To: not null }
-            && request.From >= request.To)
-            throw new ArgumentException(message: CommonExceptionTexts.FromMoreThanTo);
+        if (request.Page < 1)
+            throw new ArgumentException("Page must be greater than 0.");
         
         if (request is { MaxDiameter: not null, MinDiameter: not null }
             && request.MaxDiameter <= request.MinDiameter)
