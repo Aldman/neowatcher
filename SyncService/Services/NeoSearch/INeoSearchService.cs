@@ -1,0 +1,8 @@
+﻿using SyncService.NeoWatcherApi.Controllers.NeoSearch.DTOs;
+
+namespace SyncService.Services.NeoSearch;
+
+public interface INeoSearchService
+{
+    Task<IEnumerable<NeoSearchResult>> SearchAsync(NeoSearchRequest request, CancellationToken cancellationToken);
+}
