@@ -35,4 +35,20 @@ public class NeoSearchController : NeoControllerBase
         MemoryCache.Set(cacheKey, results, CacheOptions);
         return Ok(results);
     }
+    
+    [HttpGet("FindSimilar")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> FindSimilarAsync(string neoId, CancellationToken cancellationToken = default)
+    {
+        if (MemoryCache.TryGetValue(neoId, out var response))
+            return Ok(response);
+
+        var results = await _searchService.FindSimilarAsync(neoId, cancellationToken);
+        if (results is null)
+            return NoContent();
+
+        MemoryCache.Set(neoId, results, CacheOptions);
+        return Ok(results);
+    }
 }
