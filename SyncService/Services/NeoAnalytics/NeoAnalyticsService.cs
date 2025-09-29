@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SyncService.DTOs.NeoAnalytics;
 using SyncService.EfComponents.Repository;
 using SyncService.Extensions;
 using SyncService.Helpers;
-using SyncService.NeoWatcherApi.Controllers.NeoAnalytics.DTOs;
 
 namespace SyncService.Services.NeoAnalytics;
 

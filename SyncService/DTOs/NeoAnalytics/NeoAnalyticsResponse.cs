@@ -1,4 +1,4 @@
-﻿namespace SyncService.NeoWatcherApi.Controllers.NeoAnalytics.DTOs;
+﻿namespace SyncService.DTOs.NeoAnalytics;
 
 public class NeoAnalyticsResponse
 {

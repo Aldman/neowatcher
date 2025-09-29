@@ -1,4 +1,4 @@
-﻿using SyncService.NeoWatcherApi.Controllers.NeoSearch.DTOs;
+﻿using SyncService.DTOs.NeoSearch;
 
 namespace SyncService.Services.NeoSearch;
 

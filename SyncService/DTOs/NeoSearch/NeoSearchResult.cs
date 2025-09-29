@@ -1,4 +1,4 @@
-﻿namespace SyncService.NeoWatcherApi.Controllers.NeoSearch.DTOs;
+﻿namespace SyncService.DTOs.NeoSearch;
 
 public class NeoSearchResult
 {

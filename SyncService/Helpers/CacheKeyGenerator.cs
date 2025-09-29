@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
-using SyncService.NeoWatcherApi.Controllers.NeoSearch.DTOs;
+using SyncService.DTOs.NeoSearch;
 
 namespace SyncService.Helpers;
 

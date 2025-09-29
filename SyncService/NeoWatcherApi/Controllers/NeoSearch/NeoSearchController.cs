@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using SyncService.DTOs.NeoSearch;
 using SyncService.Helpers;
-using SyncService.NeoWatcherApi.Controllers.NeoSearch.DTOs;
 using SyncService.Services.NeoSearch;
 
 namespace SyncService.NeoWatcherApi.Controllers.NeoSearch;
