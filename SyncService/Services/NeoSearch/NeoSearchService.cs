@@ -103,4 +103,17 @@ public class NeoSearchService : INeoSearchService
             .Take(DefaultLimit)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<string>?> GetSuggestionsAsync(
+        string query,
+        int limit = 10,
+        CancellationToken cancellationToken = default)
+    {
+        return await _neoRepository.GetNearEarthObjectsAsQueryable()
+            .Where(x => EF.Functions.Like(x.Name, $"%{query}%"))
+            .Select(x => x.Name)
+            .Distinct()
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+    }
 }
