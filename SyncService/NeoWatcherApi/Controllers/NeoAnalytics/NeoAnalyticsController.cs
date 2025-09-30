@@ -19,6 +19,7 @@ public class NeoAnalyticsController : NeoControllerBase
 
     [HttpGet("byDateRange")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
     public async Task<IActionResult> GetAnalyticsByDateRangeAsync(
         DateTime from,
@@ -29,14 +30,10 @@ public class NeoAnalyticsController : NeoControllerBase
             return validationProblem!;
         
         var cacheKey = CacheKeyGenerator.Generate(from, to);
-        if (MemoryCache.TryGetValue(cacheKey, out var response))
-            return Ok(response);
-
-        var results = await _analyticsService
-            .GetDateRangeAnalyticsAsync(from, to, cancellationToken);
-        
-        MemoryCache.Set(cacheKey, results, CacheOptions);
-        return Ok(results);
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _analyticsService.GetDateRangeAnalyticsAsync(from, to, cancellationToken),
+            returnNoContentIfNull: true);
     }
     
     private bool IsRangeInvalid(DateTime from, DateTime to, out IActionResult? validationProblem)
@@ -56,21 +53,19 @@ public class NeoAnalyticsController : NeoControllerBase
     
     [HttpGet("hazardousAnalysis")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> GetHazardousAnalysisAsync(CancellationToken cancellationToken = default)
     {
         var cacheKey = CacheKeyGenerator.Generate();
-        if (MemoryCache.TryGetValue(cacheKey, out var response))
-            return Ok(response);
-
-        var results = await _analyticsService
-            .GetHazardousAnalysisAsync(cancellationToken);
-        
-        MemoryCache.Set(cacheKey, results, CacheOptions);
-        return Ok(results);
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _analyticsService.GetHazardousAnalysisAsync(cancellationToken),
+            returnNoContentIfNull: true);
     }
     
     [HttpGet("comparePeriods")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
     public async Task<IActionResult> ComparePeriodsAsync(
         DateTime period1Start,
@@ -85,13 +80,11 @@ public class NeoAnalyticsController : NeoControllerBase
             return validationProblem2!;
         
         var cacheKey = CacheKeyGenerator.Generate(period1Start, period1End, period2Start, period2End);
-        if (MemoryCache.TryGetValue(cacheKey, out var response))
-            return Ok(response);
-
-        var results = await _analyticsService
-            .ComparePeriodsAsync(period1Start, period1End, period2Start, period2End, cancellationToken);
         
-        MemoryCache.Set(cacheKey, results, CacheOptions);
-        return Ok(results);
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _analyticsService
+                .ComparePeriodsAsync(period1Start, period1End, period2Start, period2End, cancellationToken),
+            returnNoContentIfNull: false);
     }
 }
