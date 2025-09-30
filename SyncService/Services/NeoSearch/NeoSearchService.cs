@@ -3,7 +3,6 @@ using SyncService.DTOs.NeoSearch;
 using SyncService.EfComponents.Repository;
 using SyncService.Extensions;
 using SyncService.Helpers;
-using SyncService.Helpers.CompareHelpers;
 
 namespace SyncService.Services.NeoSearch;
 
@@ -60,14 +59,31 @@ public class NeoSearchService : INeoSearchService
         var maxVelocity = await query.MaxAsync(x => x.CloseApproachData.RelativeVelocityKmh, cancellationToken);
         var minVelocity = await query.MinAsync(x => x.CloseApproachData.RelativeVelocityKmh, cancellationToken);
 
-        var normalizer = new DoubleComparingNormalizer(minDiameter, maxDiameter, minVelocity, maxVelocity);
-        var normalisedForComparison = normalizer.NormalizeForComparing(forComparison); 
+        var diameterRange = new NumberPropertyRange<double>(minDiameter, maxDiameter);
+        var velocityRange = new NumberPropertyRange<double>(minVelocity, maxVelocity);
+
+        var normalizeValue = (double value, NumberPropertyRange<double> range)
+            => range.DiffIsZero
+                ? 0
+                : (value - range.Min) / range.Diff;
+
+        var forComparisonMinDiameter = normalizeValue(forComparison.EstimatedDiameterMin, diameterRange);
+        var forComparisonMaxDiameter =  normalizeValue(forComparison.EstimatedDiameterMax, diameterRange);
+        var forComparisonVelocity = normalizeValue(forComparison.CloseApproachData.RelativeVelocityKmh, velocityRange);
         
         return await query.Where(x => x.Id != neoId)
             .Select(x => new
             {
                 OriginalObj = x,
-                NormalizedForComparing = normalizer.NormalizeForComparing(x)
+                NormalizedMinDiameter = diameterRange.DiffIsZero
+                    ? 0
+                    : (x.EstimatedDiameterMin - diameterRange.Min) / diameterRange.Diff,
+                NormalizedMaxDiameter = diameterRange.DiffIsZero
+                    ? 0
+                    : (x.EstimatedDiameterMax - diameterRange.Min) / diameterRange.Diff,
+                NormalizedVelocity = velocityRange.DiffIsZero
+                    ? 0
+                    : (x.CloseApproachData.RelativeVelocityKmh - velocityRange.Min) / velocityRange.Diff
             })
             .Select(x => new NeoSearchResult
             {
@@ -77,7 +93,11 @@ public class NeoSearchService : INeoSearchService
                 IsHazardous = x.OriginalObj.IsPotentiallyHazardous,
                 Velocity = x.OriginalObj.CloseApproachData.RelativeVelocityKmh,
                 MissDistance = x.OriginalObj.CloseApproachData.MissDistanceKm,
-                SimilarityScore = ComparingPropertiesComparer.CalculateSimilarity(normalisedForComparison, x.NormalizedForComparing)
+                SimilarityScore = 1 / (1 + Math.Sqrt(
+                    (forComparisonMinDiameter - x.NormalizedMinDiameter) * (forComparisonMinDiameter - x.NormalizedMinDiameter)
+                    + (forComparisonMaxDiameter - x.NormalizedMaxDiameter) * (forComparisonMaxDiameter - x.NormalizedMaxDiameter)
+                    + (forComparisonVelocity - x.NormalizedVelocity) * (forComparisonVelocity - x.NormalizedVelocity)
+                    ))
             })
             .OrderByDescending(x => x.SimilarityScore)
             .Take(DefaultLimit)

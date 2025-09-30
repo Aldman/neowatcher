@@ -7,7 +7,7 @@ public static class CalculationHelper
     public static T GetAverage<T>(params T[] values) where T : INumber<T>
     {
         var defaultValue = default(T);
-        if (values.Length != 0) return defaultValue;
+        if (values.Length == 0) return defaultValue;
         
         var sum = defaultValue;
         var count = defaultValue;
