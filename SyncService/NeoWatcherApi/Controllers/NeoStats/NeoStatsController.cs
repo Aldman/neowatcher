@@ -20,19 +20,18 @@ public class NeoStatsController : NeoControllerBase
 
     [HttpGet("stats")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetStats(
         [FromQuery] NeoFilterRequest filter,
         CancellationToken cancellationToken = default)
     {
         NeoFilterRequestValidator.Validate(filter);
-        var filterKey = CacheKeyGenerator.Generate(filter);
-        if (MemoryCache.TryGetValue(filterKey, out var response))
-            return Ok(response);
+        var cacheKey = CacheKeyGenerator.Generate(filter);
         
-        var result = await _neoStatsService.GetFilteredStatsAsync(filter, cancellationToken);
-        
-        MemoryCache.Set(filterKey, result, CacheOptions);
-        return Ok(result);
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _neoStatsService.GetFilteredStatsAsync(filter, cancellationToken),
+            returnNoContentIfNull: true);
     }
 }

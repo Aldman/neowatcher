@@ -56,21 +56,4 @@ public class NeoSearchController : NeoControllerBase
             executeAsync: () => _searchService.GetSuggestionsAsync(query, limit, cancellationToken),
             returnNoContentIfNull: true);
     }
-    
-    private async Task<IActionResult> GetFromCacheOrExecuteAsync<T>(
-        string cacheKey, 
-        Func<Task<T>> executeAsync, 
-        bool returnNoContentIfNull = false)
-    {
-        if (MemoryCache.TryGetValue(cacheKey, out var response))
-            return Ok(response);
-
-        var results = await executeAsync();
-
-        if (returnNoContentIfNull && results is null)
-            return NoContent();
-
-        MemoryCache.Set(cacheKey, results, CacheOptions);
-        return Ok(results);
-    }
 }
