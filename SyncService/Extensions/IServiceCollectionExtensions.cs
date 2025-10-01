@@ -6,6 +6,7 @@ using SyncService.EfComponents;
 using SyncService.EfComponents.Repository;
 using SyncService.NasaApi.Client;
 using SyncService.Services.NeoAnalytics;
+using SyncService.Services.NeoReporting;
 using SyncService.Services.NeoSearch;
 using SyncService.Services.NeoStatistics;
 using SyncService.Services.NeoStats;
@@ -24,6 +25,7 @@ public static class IServiceCollectionExtensions
         services.AddScoped<INeoAnalyticsService, NeoAnalyticsService>();
         services.AddScoped<INeoSearchService, NeoSearchService>();
         services.AddScoped<INeoStatisticsService, NeoStatisticsService>();
+        services.AddScoped<INeoReportingService, NeoReportingService>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
         services.AddEndpointsApiExplorer();
