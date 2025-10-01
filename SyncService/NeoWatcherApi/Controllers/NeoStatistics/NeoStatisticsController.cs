@@ -39,4 +39,24 @@ public class NeoStatisticsController : NeoControllerBase
             executeAsync: () => _statisticsService.GetBasicStatisticsAsync(from, to, cancellationToken),
             returnNoContentIfNull: true);
     }
+    
+    [HttpGet ("DiameterDistribution")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> GetDiameterDistributionAsync(int buckets = 10, CancellationToken cancellationToken = default)
+    {
+        if (buckets <= 0)
+            return ValidationProblem(
+                detail: "The number of buckets must be greater than zero.",
+                statusCode: StatusCodes.Status422UnprocessableEntity
+            );
+            
+        const string cacheKey = "DiameterDistribution";
+
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _statisticsService.GetDiameterDistributionAsync(buckets, cancellationToken),
+            returnNoContentIfNull: true);
+    }
 }

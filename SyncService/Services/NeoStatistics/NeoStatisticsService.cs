@@ -56,4 +56,61 @@ public class NeoStatisticsService : INeoStatisticsService
             HazardousPercentage = (double)hazardousCount / fromDb.Count
         };
     }
+
+    public async Task<IEnumerable<NeoDistributionResponse>> GetDiameterDistributionAsync(
+        int buckets = 10,
+        CancellationToken cancellationToken = default)
+    {
+        var diameters = await _neoRepository
+            .GetNearEarthObjectsAsQueryable()
+            .Select(x => CalculationHelper.GetAverage(x.EstimatedDiameterMax, x.EstimatedDiameterMin))
+            .ToListAsync(cancellationToken);
+
+        if (diameters.Count == 0)
+            return null;
+
+        var min = diameters.Min();
+        var max = diameters.Max();
+
+        if (min.Equals(max))
+            return
+            [
+                new NeoDistributionResponse
+                {
+                    MinValue = min,
+                    MaxValue = max,
+                    Count = diameters.Count,
+                    Percentage = 1.0
+                }
+            ];
+        
+        var bucketSize = (max - min) / buckets;
+        var total = diameters.Count;
+
+        var distribution = Enumerable.Range(0, buckets)
+            .Select(i => new NeoDistributionResponse
+            {
+                MinValue = min + i * bucketSize,
+                MaxValue = i == buckets - 1
+                    ? max 
+                    : min + (i + 1) * bucketSize,
+                Count = 0,
+                Percentage = 0
+            })
+            .ToList();
+
+        foreach (var d in diameters)
+        {
+            var index = (int)((d - min) / bucketSize);
+            if (index == buckets) index = buckets - 1;
+            distribution[index].Count++;
+        }
+
+        foreach (var bucket in distribution)
+        {
+            bucket.Percentage = (double)bucket.Count / total;
+        }
+
+        return distribution;
+    }
 }
