@@ -57,7 +57,7 @@ public class NeoStatisticsService : INeoStatisticsService
         };
     }
 
-    public async Task<IEnumerable<NeoDistributionResponse>> GetDiameterDistributionAsync(
+    public async Task<IEnumerable<NeoDistributionResponse>?> GetDiameterDistributionAsync(
         int buckets = 10,
         CancellationToken cancellationToken = default)
     {
@@ -112,5 +112,80 @@ public class NeoStatisticsService : INeoStatisticsService
         }
 
         return distribution;
+    }
+
+        public async Task<IEnumerable<NeoAnomalyResponse>?> DetectAnomaliesAsync(CancellationToken cancellationToken = default)
+    {
+        var data = await _neoRepository
+            .GetFullNearEarthObjectsAsQueryable()
+            .Select(x => new
+            {
+                x.Id,
+                x.Name,
+                Diameter = CalculationHelper.GetAverage(x.EstimatedDiameterMax, x.EstimatedDiameterMin),
+                Velocity = x.CloseApproachData.RelativeVelocityKmh,
+                MissDistance = x.CloseApproachData.MissDistanceKm
+            })
+            .ToListAsync(cancellationToken);
+
+        if (data.Count == 0)
+            return null;
+
+        var diameters = data.Select(x => x.Diameter).ToList();
+        var velocities = data.Select(x => x.Velocity).ToList();
+        var missDistances = data.Select(x => x.MissDistance).ToList();
+
+        var meanDiameter = diameters.Average();
+        var meanVelocity = velocities.Average();
+        var meanMissDistance = missDistances.Average();
+
+        var stdDiameter = CalculationHelper.GetStandardDeviation(diameters);
+        var stdVelocity = CalculationHelper.GetStandardDeviation(velocities);
+        var stdMissDistance = CalculationHelper.GetStandardDeviation(missDistances);
+
+        const double threshold = 3.0;
+
+        var anomalies = data
+            .Select(x =>
+            {
+                var zDiameter = stdDiameter == 0 ? 0 : (x.Diameter - meanDiameter) / stdDiameter;
+                var zVelocity = stdVelocity == 0 ? 0 : (x.Velocity - meanVelocity) / stdVelocity;
+                var zMiss = stdMissDistance == 0 ? 0 : (x.MissDistance - meanMissDistance) / stdMissDistance;
+
+                var reasons = new List<string>();
+                if (Math.Abs(zDiameter) >= threshold)
+                    reasons.Add($"Diameter {(zDiameter > 0 ? "high" : "low")} (z={zDiameter:F2})");
+                if (Math.Abs(zVelocity) >= threshold)
+                    reasons.Add($"Velocity {(zVelocity > 0 ? "high" : "low")} (z={zVelocity:F2})");
+                if (Math.Abs(zMiss) >= threshold)
+                    reasons.Add($"MissDistance {(zMiss > 0 ? "high" : "low")} (z={zMiss:F2})");
+
+                var score = new[] { Math.Abs(zDiameter), Math.Abs(zVelocity), Math.Abs(zMiss) }.Max();
+
+                return new
+                {
+                    x.Id,
+                    x.Name,
+                    x.Diameter,
+                    x.Velocity,
+                    x.MissDistance,
+                    Reasons = reasons,
+                    Score = score
+                };
+            })
+            .Where(a => a.Reasons.Count > 0)
+            .Select(a => new NeoAnomalyResponse
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Diameter = a.Diameter,
+                Velocity = a.Velocity,
+                MissDistance = a.MissDistance,
+                AnomalyReasons = a.Reasons,
+                AnomalyScore = a.Score
+            })
+            .ToList();
+
+        return anomalies.Count == 0 ? null : anomalies;
     }
 }

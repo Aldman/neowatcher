@@ -59,4 +59,18 @@ public class NeoStatisticsController : NeoControllerBase
             executeAsync: () => _statisticsService.GetDiameterDistributionAsync(buckets, cancellationToken),
             returnNoContentIfNull: true);
     }
+    
+    [HttpGet ("DetectAnomalies")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    public async Task<IActionResult> DetectAnomaliesAsync(CancellationToken cancellationToken = default)
+    {
+        const string cacheKey = "DetectAnomalies";
+
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _statisticsService.DetectAnomaliesAsync(cancellationToken),
+            returnNoContentIfNull: true);
+    }
 }
