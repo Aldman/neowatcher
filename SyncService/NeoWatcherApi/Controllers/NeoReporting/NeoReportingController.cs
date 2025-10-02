@@ -21,11 +21,24 @@ public class NeoReportingController : NeoControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> GetDailyReportAsync(DateTime date, CancellationToken cancellationToken = default)
     {
-        var cacheKey = date.ToString(CultureInfo.InvariantCulture);
+        var cacheKey = $"DailyReport:{date.ToString(CultureInfo.InvariantCulture)}";
         
         return await GetFromCacheOrExecuteAsync(
             cacheKey: cacheKey,
             executeAsync: () => _reportingService.GetDailyReportAsync(date, cancellationToken),
+            returnNoContentIfNull: true);
+    }
+    
+    [HttpGet ("WeeklyReport")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> GetWeeklyReportAsync(DateTime week, CancellationToken cancellationToken = default)
+    {
+        var cacheKey = $"WeeklyReport:{week.ToString(CultureInfo.InvariantCulture)}";
+        
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _reportingService.GetWeeklyReportAsync(week, cancellationToken),
             returnNoContentIfNull: true);
     }
 }

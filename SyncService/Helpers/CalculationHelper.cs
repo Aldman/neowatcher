@@ -49,13 +49,20 @@ public static class CalculationHelper
         return Math.Sqrt(variance);
     }
 
-    public static double CalculateChangeRatio(double newValue, double oldValue)
+    public static T CalculateChangeRatio<T>(T newValue, T oldValue) where T : INumber<T>
     {
-        if (newValue == 0 && oldValue == 0)
-            return 0;
-        if (oldValue == 0)
-            return double.PositiveInfinity;
+        if (T.IsZero(newValue) && T.IsZero(oldValue))
+            return T.Zero;
+        if (T.IsZero(oldValue))
+            throw new ArgumentException($"{nameof(oldValue)} should not be zero", nameof(oldValue));
         
         return (newValue - oldValue) / oldValue;
+    }
+    
+    public static T CalculateChangeRatioWithInfinite<T>(T newValue, T oldValue, T infiniteValue) where T : INumber<T>
+    {
+        return T.IsZero(oldValue) 
+            ? infiniteValue 
+            : CalculateChangeRatio(newValue, oldValue);
     }
 }

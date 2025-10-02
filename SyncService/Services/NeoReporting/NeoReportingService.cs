@@ -52,4 +52,60 @@ public class NeoReportingService : INeoReportingService
             HourlyStats = hourlyStats
         };
     }
+
+    public async Task<WeeklyReportResponse?> GetWeeklyReportAsync(DateTime weekStart, CancellationToken cancellationToken = default)
+    {
+        var previousWeekStart = weekStart.Subtract(TimeSpan.FromDays(7));
+        var weekEnd = weekStart.Add(TimeSpan.FromDays(7));
+
+        var weekStatsCalculation = (DateTime startDate) => _neoRepository.GetFullNearEarthObjectsAsQueryable()
+            .Where(x => x.CloseApproachData.CloseApproachDate.Date >= startDate.Date)
+            .Where(x => x.CloseApproachData.CloseApproachDate.Date <= startDate.AddDays(7))
+            .Select(x => new
+            {
+                Date = x.CloseApproachData.CloseApproachDate,
+                IsHazardous = x.IsPotentiallyHazardous,
+                AverageDiameter = (x.EstimatedDiameterMin + x.EstimatedDiameterMax) / 2,
+                MaxDiameter = x.EstimatedDiameterMax,
+            });
+        
+        var currentWeekStats = weekStatsCalculation(weekStart);
+        var previousWeekStats = weekStatsCalculation(previousWeekStart);
+
+        var dailyStats = await currentWeekStats.GroupBy(x => x.Date.Date)
+            .Select(g => new DailyStats
+            {
+                Date = g.Key,
+                TotalCount = g.Count(),
+                HazardousCount = g.Count(x => x.IsHazardous),
+                AverageDiameter = g.Average(x => x.AverageDiameter),
+                MaxDiameter = g.Max(x => x.MaxDiameter)
+            }).ToListAsync(cancellationToken);
+
+        var currentTotal = currentWeekStats.Count();
+        var previousTotal = previousWeekStats.Count();
+        var currentHazardous = currentWeekStats.Count(x => x.IsHazardous);
+        var previousHazardous = previousWeekStats.Count(x => x.IsHazardous);
+        var weeklyComparison = new WeeklyComparison
+        {
+            CurrentTotal = currentTotal,
+            PreviousTotal = previousTotal,
+            CurrentHazardous = currentHazardous,
+            PreviousHazardous = previousHazardous,
+            DeltaTotal = currentTotal - previousTotal,
+            DeltaHazardous = currentHazardous - previousHazardous,
+            PercentChangeTotal = CalculationHelper.CalculateChangeRatioWithInfinite(currentTotal, previousTotal, double.MaxValue),
+            PercentChangeHazardous = CalculationHelper.CalculateChangeRatioWithInfinite(currentHazardous, previousHazardous, double.MaxValue),
+        };
+
+        return new WeeklyReportResponse
+        {
+            DateStart = weekStart,
+            DateEnd = weekEnd,
+            TotalCount = currentTotal,
+            HazardousCount = currentHazardous,
+            DailyStats = dailyStats,
+            Comparison = weeklyComparison
+        };
+    }
 }
