@@ -18,6 +18,12 @@ public class NeoStatsController : NeoControllerBase
         _neoStatsService = neoStatsService;
     }
 
+    /// <summary>
+    /// Получение статистических данных с фильтрацией.
+    /// Возвращает отфильтрованные статистики по объектам с возможностью сортировки.
+    /// </summary>
+    /// <param name="filter">Параметры фильтрации и сортировки</param>
+    /// <returns>Отфильтрованные статистические данные</returns>
     [HttpGet("stats")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

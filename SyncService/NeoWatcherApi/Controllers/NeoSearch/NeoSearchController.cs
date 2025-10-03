@@ -17,6 +17,13 @@ public class NeoSearchController : NeoControllerBase
         _searchService = searchService;
     }
 
+    /// <summary>
+    /// Поиск объектов по различным критериям.
+    /// Поддерживает поиск по имени, фильтрацию по диаметру и статусу опасности.
+    /// Результаты возвращаются с пагинацией.
+    /// </summary>
+    /// <param name="request">Параметры поиска включая имя, диапазон диаметров, статус опасности и пагинацию</param>
+    /// <returns>Список найденных объектов или пустой результат</returns>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -54,6 +61,13 @@ public class NeoSearchController : NeoControllerBase
             returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Получение предложений для автодополнения поисковых запросов.
+    /// Возвращает список уникальных имен объектов, начинающихся с указанного запроса.
+    /// </summary>
+    /// <param name="query">Поисковый запрос для автодополнения</param>
+    /// <param name="limit">Максимальное количество предложений (по умолчанию 10)</param>
+    /// <returns>Список предложений для автодополнения</returns>
     [HttpGet("GetSuggestions")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

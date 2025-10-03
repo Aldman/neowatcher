@@ -17,6 +17,14 @@ public class NeoStatisticsController : NeoControllerBase
         _statisticsService = statisticsService;
     }
     
+    /// <summary>
+    /// Получение базовых статистических данных.
+    /// Вычисляет среднее, медиану, стандартное отклонение для диаметра, скорости и расстояния.
+    /// Поддерживает фильтрацию по временному диапазону.
+    /// </summary>
+    /// <param name="from">Начальная дата фильтрации (опционально)</param>
+    /// <param name="to">Конечная дата фильтрации (опционально)</param>
+    /// <returns>Базовые статистики по объектам</returns>
     [HttpGet ("basic")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -40,6 +48,12 @@ public class NeoStatisticsController : NeoControllerBase
             returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Получение распределения диаметров объектов в виде гистограммы.
+    /// Создает настраиваемое количество корзин для анализа распределения диаметров.
+    /// </summary>
+    /// <param name="buckets">Количество корзин для гистограммы (по умолчанию 10)</param>
+    /// <returns>Распределение диаметров по корзинам</returns>
     [HttpGet ("DiameterDistribution")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -60,6 +74,12 @@ public class NeoStatisticsController : NeoControllerBase
             returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Детекция аномальных объектов в данных.
+    /// Использует алгоритм на основе Z-score для выявления объектов с необычными характеристиками.
+    /// Определяет причины аномальности для каждого найденного объекта.
+    /// </summary>
+    /// <returns>Список аномальных объектов с причинами аномальности</returns>
     [HttpGet ("DetectAnomalies")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

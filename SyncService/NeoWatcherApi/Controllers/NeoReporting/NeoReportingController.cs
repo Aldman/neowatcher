@@ -18,6 +18,12 @@ public class NeoReportingController : NeoControllerBase
         _reportingService = reportingService;
     }
     
+    /// <summary>
+    /// Генерация ежедневного отчета.
+    /// Создает отчет за конкретный день с группировкой по часам и статистиками по каждому часу.
+    /// </summary>
+    /// <param name="date">Дата для генерации отчета</param>
+    /// <returns>Ежедневный отчет с почасовой статистикой</returns>
     [HttpGet ("DailyReport")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -31,6 +37,12 @@ public class NeoReportingController : NeoControllerBase
             returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Генерация еженедельного отчета.
+    /// Создает отчет за неделю с группировкой по дням недели и сравнением с предыдущей неделей.
+    /// </summary>
+    /// <param name="week">Дата начала недели для генерации отчета</param>
+    /// <returns>Еженедельный отчет с ежедневной статистикой и сравнением</returns>
     [HttpGet ("WeeklyReport")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -44,6 +56,13 @@ public class NeoReportingController : NeoControllerBase
             returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Генерация сводного отчета за период.
+    /// Создает комплексный отчет с топ-10 самых опасных объектов и анализом трендов по времени.
+    /// </summary>
+    /// <param name="from">Начальная дата периода</param>
+    /// <param name="to">Конечная дата периода</param>
+    /// <returns>Сводный отчет с топ-опасными объектами и трендами</returns>
     [HttpGet ("SummaryReport")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

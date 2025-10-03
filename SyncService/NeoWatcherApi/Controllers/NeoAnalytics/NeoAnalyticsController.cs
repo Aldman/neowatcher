@@ -17,6 +17,13 @@ public class NeoAnalyticsController : NeoControllerBase
         _analyticsService = analyticsService;
     }
 
+    /// <summary>
+    /// Получение аналитических данных по диапазону дат.
+    /// Группирует объекты по датам и вычисляет статистики: количество, максимальный/минимальный диаметр, средняя скорость.
+    /// </summary>
+    /// <param name="from">Начальная дата диапазона</param>
+    /// <param name="to">Конечная дата диапазона</param>
+    /// <returns>Аналитические данные по датам в указанном диапазоне</returns>
     [HttpGet("byDateRange")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -51,6 +58,11 @@ public class NeoAnalyticsController : NeoControllerBase
         return false;
     }
     
+    /// <summary>
+    /// Анализ опасных объектов по времени.
+    /// Группирует объекты по году, месяцу и статусу опасности для анализа распределения опасных объектов.
+    /// </summary>
+    /// <returns>Анализ распределения опасных объектов по времени</returns>
     [HttpGet("hazardousAnalysis")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -63,6 +75,15 @@ public class NeoAnalyticsController : NeoControllerBase
             returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Сравнение двух временных периодов.
+    /// Вычисляет изменения в процентах между периодами и анализирует тренды.
+    /// </summary>
+    /// <param name="period1Start">Начало первого периода</param>
+    /// <param name="period1End">Конец первого периода</param>
+    /// <param name="period2Start">Начало второго периода</param>
+    /// <param name="period2End">Конец второго периода</param>
+    /// <returns>Результат сравнения двух периодов с анализом изменений</returns>
     [HttpGet("comparePeriods")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
