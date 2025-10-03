@@ -108,4 +108,66 @@ public class NeoReportingService : INeoReportingService
             Comparison = weeklyComparison
         };
     }
+
+    public async Task<SummaryReportResponse?> GetSummaryReportAsync(
+        DateTime from, 
+        DateTime to,
+        CancellationToken cancellationToken = default)
+    {
+        var objectsInPeriod = await _neoRepository.GetFullNearEarthObjectsAsQueryable()
+            .Where(x => x.CloseApproachData.CloseApproachDate.Date >= from.Date)
+            .Where(x => x.CloseApproachData.CloseApproachDate.Date <= to.Date)
+            .Select(x => new
+            {
+                Id = x.Id,
+                Name = x.Name,
+                CloseApproachDate = x.CloseApproachData.CloseApproachDate,
+                IsHazardous = x.IsPotentiallyHazardous,
+                AverageDiameter = CalculationHelper.GetAverage(x.EstimatedDiameterMin, x.EstimatedDiameterMax),
+                MaxDiameter = x.EstimatedDiameterMax,
+                Velocity = x.CloseApproachData.RelativeVelocityKmh,
+                MissDistance = x.CloseApproachData.MissDistanceKm
+            })
+            .ToListAsync(cancellationToken);
+
+        if (objectsInPeriod.Count == 0) return null;
+        
+        var topHazardous = objectsInPeriod
+            .Where(x => x.IsHazardous)
+            .Select(x => new TopHazardousObject
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Diameter = x.AverageDiameter,
+                Velocity = x.Velocity,
+                MissDistance = x.MissDistance,
+                CloseApproachDate = x.CloseApproachDate,
+                DangerScore = (x.AverageDiameter * x.Velocity) / Math.Max(x.MissDistance, 1)
+            })
+            .OrderByDescending(x => x.DangerScore)
+            .Take(10)
+            .ToList();
+        
+        var trends = objectsInPeriod
+            .GroupBy(x => x.CloseApproachDate.Date)
+            .OrderBy(x => x.Key)
+            .Select(g => new TrendData
+            {
+                PeriodStart = g.Key,
+                TotalCount = g.Count(),
+                HazardousCount = g.Count(x => x.IsHazardous),
+                AvgDiameter = g.Average(x => x.AverageDiameter)
+            })
+            .ToList();
+
+        return new SummaryReportResponse
+        {
+            From = from,
+            To = to,
+            TotalCount = objectsInPeriod.Count,
+            HazardousCount = objectsInPeriod.Count(x => x.IsHazardous),
+            TopHazardous = topHazardous,
+            Trends = trends
+        };
+    }
 }

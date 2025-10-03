@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using SyncService.Constants;
+using SyncService.Helpers;
 using SyncService.Services.NeoReporting;
 
 namespace SyncService.NeoWatcherApi.Controllers.NeoReporting;
@@ -39,6 +41,28 @@ public class NeoReportingController : NeoControllerBase
         return await GetFromCacheOrExecuteAsync(
             cacheKey: cacheKey,
             executeAsync: () => _reportingService.GetWeeklyReportAsync(week, cancellationToken),
+            returnNoContentIfNull: true);
+    }
+    
+    [HttpGet ("SummaryReport")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public async Task<IActionResult> GetSummaryReportAsync(
+        DateTime from, 
+        DateTime to,
+        CancellationToken cancellationToken = default)
+    {
+        if (from > to)
+            return ValidationProblem(
+                detail: CommonExceptionTexts.FromMoreThanTo,
+                statusCode: StatusCodes.Status416RangeNotSatisfiable
+            );
+        
+        var cacheKey = $"SummaryReport:{CacheKeyGenerator.Generate(from, to)}))";
+        
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _reportingService.GetSummaryReportAsync(from, to, cancellationToken),
             returnNoContentIfNull: true);
     }
 }
