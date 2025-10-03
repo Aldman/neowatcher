@@ -35,6 +35,14 @@ public class NeoSearchController : NeoControllerBase
             returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Поиск объектов с похожими характеристиками.
+    /// Алгоритм схожести на основе диаметра и скорости.
+    /// Ранжирование по степени схожести.
+    /// </summary>
+    /// <param name="neoId">Идентификатор объекта</param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     [HttpGet("FindSimilar")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

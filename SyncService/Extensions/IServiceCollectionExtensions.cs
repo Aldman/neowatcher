@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection;
+using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using SyncService.Api.NeoWatcher.Swagger;
 using SyncService.BackgroundLogic;
@@ -36,10 +37,14 @@ public static class IServiceCollectionExtensions
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-        services.AddSwaggerGen(c =>
+        services.AddSwaggerGen(options =>
         {
-            c.SchemaFilter<EnumSchemaFilter>();
-            c.MapType<DateTime>(() => new OpenApiSchema { Type = "string", Format = "date" });
+            options.IncludeXmlComments(Path.Combine(
+                AppContext.BaseDirectory,
+                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"), true);
+
+            options.SchemaFilter<EnumSchemaFilter>();
+            options.MapType<DateTime>(() => new OpenApiSchema { Type = "string", Format = "date" });
         });
     }
 }
