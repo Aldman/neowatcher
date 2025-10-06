@@ -56,8 +56,7 @@ public class NeoAnalyticsService : INeoAnalyticsService
                 Month = g.Key.Month,
                 IsHazardous = g.Key.IsHazardous,
                 Count = g.Count(),
-                AvgDiameter = g.Average(x =>
-                    CalculationHelper.GetAverage(x.EstimatedDiameterMax, x.EstimatedDiameterMin)),
+                AvgDiameter = g.Average(x => (x.EstimatedDiameterMax + x.EstimatedDiameterMin) / 2),
                 MaxDiameter = g.Max(x => x.EstimatedDiameterMax),
                 AvgVelocity = g.Average(x => x.CloseApproachData.RelativeVelocityKmh),
                 MinMissDistance = g.Min(x => x.CloseApproachData.MissDistanceKm)
