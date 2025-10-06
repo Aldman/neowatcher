@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Reflection;
+using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using SyncService.Api.NeoWatcher.Swagger;
 using SyncService.BackgroundLogic;
@@ -6,6 +7,9 @@ using SyncService.EfComponents;
 using SyncService.EfComponents.Repository;
 using SyncService.NasaApi.Client;
 using SyncService.Services.NeoAnalytics;
+using SyncService.Services.NeoReporting;
+using SyncService.Services.NeoSearch;
+using SyncService.Services.NeoStatistics;
 using SyncService.Services.NeoStats;
 
 namespace SyncService.Extensions;
@@ -20,6 +24,9 @@ public static class IServiceCollectionExtensions
         services.AddScoped<INeoRepository, NeoRepository>();
         services.AddScoped<INeoStatsService, NeoStatsService>();
         services.AddScoped<INeoAnalyticsService, NeoAnalyticsService>();
+        services.AddScoped<INeoSearchService, NeoSearchService>();
+        services.AddScoped<INeoStatisticsService, NeoStatisticsService>();
+        services.AddScoped<INeoReportingService, NeoReportingService>();
         services.AddScoped<SyncJob>();
         services.AddHostedService<SyncServiceWorker>();
         services.AddEndpointsApiExplorer();
@@ -30,10 +37,14 @@ public static class IServiceCollectionExtensions
             {
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
-        services.AddSwaggerGen(c =>
+        services.AddSwaggerGen(options =>
         {
-            c.SchemaFilter<EnumSchemaFilter>();
-            c.MapType<DateTime>(() => new OpenApiSchema { Type = "string", Format = "date" });
+            options.IncludeXmlComments(Path.Combine(
+                AppContext.BaseDirectory,
+                $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"), true);
+
+            options.SchemaFilter<EnumSchemaFilter>();
+            options.MapType<DateTime>(() => new OpenApiSchema { Type = "string", Format = "date" });
         });
     }
 }

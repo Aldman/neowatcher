@@ -1,4 +1,4 @@
-﻿using SyncService.NeoWatcherApi.Controllers.NeoAnalytics.DTOs;
+﻿using SyncService.DTOs.NeoAnalytics;
 
 namespace SyncService.Services.NeoAnalytics;
 
