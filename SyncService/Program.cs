@@ -1,6 +1,5 @@
 using Serilog;
 using SyncService.Extensions;
-using SyncService.Middlewares;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
