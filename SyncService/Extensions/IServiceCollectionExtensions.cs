@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using SyncService.Api.NeoWatcher.Swagger;
 using SyncService.BackgroundLogic;
+using SyncService.Constants;
 using SyncService.EfComponents;
 using SyncService.EfComponents.Repository;
 using SyncService.NasaApi.Client;
@@ -18,7 +20,18 @@ public static class IServiceCollectionExtensions
 {
     public static void Initialize(this IServiceCollection services)
     {
-        services.AddDbContext<NeoContext>();
+        services.AddDbContext<NeoContext>(opts =>
+        {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+        
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+            var connectionString = configuration.GetConnectionString(WellKnownNames.DefaultConnection);
+        
+            opts.UseNpgsql(connectionString);
+        });
         services.AddScoped<HttpClient>();
         services.AddScoped<INasaApiClient, NasaApiClient>();
         services.AddScoped<INeoRepository, NeoRepository>();
