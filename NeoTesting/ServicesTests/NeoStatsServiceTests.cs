@@ -176,6 +176,21 @@ public class NeoStatsServiceTests(ServiceProviderTemplate servicesTemplate) : Ba
                     }
                 }
             ];
+            
+            yield return
+            [
+                "Запрос с пустым ответом",
+                new NeoFilterRequest
+                {
+                    From = new DateTime(2008, 9, 2),
+                    To = new DateTime(2009, 9, 15),
+                    IsHazardous = true,
+                    SortBy = SortBy.Date,
+                    SortDirection = SortDirections.Desc
+                },
+                
+                new List<NeoStatsResponse>()
+            ];
         }
     }
     
