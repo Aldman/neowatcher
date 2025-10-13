@@ -15,12 +15,12 @@ public class NeoAnalyticsService : INeoAnalyticsService
         _neoRepository = neoRepository;
     }
 
-    public async Task<IEnumerable<NeoAnalyticsResponse>> GetDateRangeAnalyticsAsync(
+    public async Task<IEnumerable<NeoAnalyticsResponse>?> GetDateRangeAnalyticsAsync(
         DateTime from,
         DateTime to,
         CancellationToken cancellationToken = default)
     {
-        return await _neoRepository
+        var result = await _neoRepository
             .GetNearEarthObjectsAsQueryable()
             .Include(x => x.CloseApproachData)
             .Where(x => x.CloseApproachData.CloseApproachDate >= from)
@@ -36,6 +36,8 @@ public class NeoAnalyticsService : INeoAnalyticsService
                 HazardousCount = g.Count(x => x.IsPotentiallyHazardous)
             })
             .ToListAsync(cancellationToken);
+        
+        return result.Count > 0 ? result : null;
     }
 
     public async Task<IEnumerable<NeoHazardousAnalysisResponse>> GetHazardousAnalysisAsync(
@@ -64,7 +66,7 @@ public class NeoAnalyticsService : INeoAnalyticsService
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<NeoComparisonResponse> ComparePeriodsAsync(
+    public async Task<NeoComparisonResponse?> ComparePeriodsAsync(
         DateTime period1Start,
         DateTime period1End,
         DateTime period2Start,
@@ -73,6 +75,8 @@ public class NeoAnalyticsService : INeoAnalyticsService
     {
         var averageStats1 = await GetNeoPartForComparison(period1Start, period1End, cancellationToken);
         var averageStats2 = await GetNeoPartForComparison(period2Start, period2End, cancellationToken);
+        
+        if (averageStats1.Count == 0 && averageStats2.Count == 0) return null;
 
         return new NeoComparisonResponse
         {
@@ -98,6 +102,9 @@ public class NeoAnalyticsService : INeoAnalyticsService
             .Where(x => x.CloseApproachData.CloseApproachDate <= periodEnd)
             .ToListAsync(cancellationToken);
 
+        if (range.Count == 0)
+            return NeoPartForComparison.Empty;
+        
         return new NeoPartForComparison
         {
             Count = range.Count,

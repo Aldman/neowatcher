@@ -21,7 +21,7 @@ public class ServiceProviderTemplate : IAsyncLifetime
         if (migrations.Contains(targetMigrationName)) 
             return provider;
         
-        await dbContext.Database.MigrateAsync(targetMigration: targetMigrationName, CancellationToken.None);
+        await dbContext.Database.MigrateAsync(targetMigration: targetMigrationName, cancellationToken);
 
         await using var connection = new NpgsqlConnection(_db!.ConnectionString);
         await connection.OpenAsync(cancellationToken);

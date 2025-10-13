@@ -20,11 +20,11 @@ public class PostgresDb
 
     public string ConnectionString => Container.GetConnectionString();
 
-    public async Task InitializeAsync()
+    private async Task InitializeAsync(CancellationToken ct = default)
     {
-        await Container.StartAsync();
+        await Container.StartAsync(ct);
         await using var conn = new NpgsqlConnection(ConnectionString);
-        await conn.OpenAsync();
+        await conn.OpenAsync(ct);
     }
 
     public async Task DisposeAsync() => await Container.DisposeAsync();
@@ -33,9 +33,7 @@ public class PostgresDb
     {
         var fixture = new PostgresDb();
         
-        await fixture.Container.StartAsync(ct);
-        await using var connection = new NpgsqlConnection(fixture.ConnectionString);
-        await connection.OpenAsync(ct);
+        await fixture.InitializeAsync(ct);
         
         return fixture;
     }
