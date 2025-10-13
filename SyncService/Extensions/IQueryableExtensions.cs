@@ -11,7 +11,7 @@ public static class QueryableExtensions
         NeoSearchRequest request)
     {
         if (request.Name is not null)
-            query = query.Where(x => EF.Functions.Like(x.Name, $"%{request.Name}%"));
+            query = query.Where(x => EF.Functions.ILike(x.Name, $"%{request.Name}%"));
         
         if (request.MinDiameter is not null)
             query = query.Where(x => x.EstimatedDiameterMin >= request.MinDiameter);

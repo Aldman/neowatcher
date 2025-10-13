@@ -16,13 +16,13 @@ public class NeoSearchService : INeoSearchService
         _neoRepository = neoRepository;
     }
     
-    public async Task<IEnumerable<NeoSearchResult>> SearchAsync(
+    public async Task<IEnumerable<NeoSearchResult>?> SearchAsync(
         NeoSearchRequest request, 
         CancellationToken cancellationToken = default)
     {
         var limit = GetLimit(request);
         
-        return await _neoRepository.GetFullNearEarthObjectsAsQueryable()
+        var results = await _neoRepository.GetFullNearEarthObjectsAsQueryable()
             .ApplyFilters(request)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(limit)
@@ -37,6 +37,8 @@ public class NeoSearchService : INeoSearchService
                 SimilarityScore = 100
             })
             .ToListAsync(cancellationToken);
+        
+        return results.Count > 0 ? results : null;
     }
 
     private static int GetLimit(NeoSearchRequest request)
@@ -109,11 +111,13 @@ public class NeoSearchService : INeoSearchService
         int limit = 10,
         CancellationToken cancellationToken = default)
     {
-        return await _neoRepository.GetNearEarthObjectsAsQueryable()
-            .Where(x => EF.Functions.Like(x.Name, $"%{query}%"))
+        var results =  await _neoRepository.GetNearEarthObjectsAsQueryable()
+            .Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
             .Select(x => x.Name)
             .Distinct()
             .Take(limit)
             .ToListAsync(cancellationToken);
+        
+        return results.Count > 0 ? results : null;
     }
 }
