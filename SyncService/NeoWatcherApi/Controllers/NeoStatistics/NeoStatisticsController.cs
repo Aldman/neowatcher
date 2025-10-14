@@ -28,7 +28,7 @@ public class NeoStatisticsController : NeoControllerBase
     [HttpGet ("basic")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
     public async Task<IActionResult> GetBasicStatisticsAsync(
         DateTime? from = null,
         DateTime? to = null,
