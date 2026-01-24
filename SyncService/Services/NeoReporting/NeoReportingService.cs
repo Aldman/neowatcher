@@ -72,6 +72,14 @@ public class NeoReportingService : INeoReportingService
         var currentWeekStats = weekStatsCalculation(weekStart);
         var previousWeekStats = weekStatsCalculation(previousWeekStart);
 
+        var currentTotal = currentWeekStats.Count();
+        var previousTotal = previousWeekStats.Count();
+        
+        if (currentTotal == 0 && previousTotal == 0) return null;
+        
+        var currentHazardous = currentWeekStats.Count(x => x.IsHazardous);
+        var previousHazardous = previousWeekStats.Count(x => x.IsHazardous);
+        
         var dailyStats = await currentWeekStats.GroupBy(x => x.Date.Date)
             .Select(g => new DailyStats
             {
@@ -82,10 +90,6 @@ public class NeoReportingService : INeoReportingService
                 MaxDiameter = g.Max(x => x.MaxDiameter)
             }).ToListAsync(cancellationToken);
 
-        var currentTotal = currentWeekStats.Count();
-        var previousTotal = previousWeekStats.Count();
-        var currentHazardous = currentWeekStats.Count(x => x.IsHazardous);
-        var previousHazardous = previousWeekStats.Count(x => x.IsHazardous);
         var weeklyComparison = new WeeklyComparison
         {
             CurrentTotal = currentTotal,

@@ -13,7 +13,7 @@ public class NeoStatisticsService : INeoStatisticsService
     {
         _neoRepository = neoRepository;
     }
-    
+
     public async Task<NeoBasicStatsResponse> GetBasicStatisticsAsync(
         DateTime? from = null,
         DateTime? to = null,
@@ -39,10 +39,10 @@ public class NeoStatisticsService : INeoStatisticsService
             return null;
 
         var diameters = fromDb.Select(x => x.Diameter);
-        
+
         var velocities = fromDb.Select(x => x.Velocity);
         var hazardousCount = fromDb.Count(x => x.IsHazardous);
-        
+
         return new NeoBasicStatsResponse
         {
             TotalCount = fromDb.Count,
@@ -83,7 +83,7 @@ public class NeoStatisticsService : INeoStatisticsService
                     Percentage = 1.0
                 }
             ];
-        
+
         var bucketSize = (max - min) / buckets;
         var total = diameters.Count;
 
@@ -92,7 +92,7 @@ public class NeoStatisticsService : INeoStatisticsService
             {
                 MinValue = min + i * bucketSize,
                 MaxValue = i == buckets - 1
-                    ? max 
+                    ? max
                     : min + (i + 1) * bucketSize,
                 Count = 0,
                 Percentage = 0
@@ -114,7 +114,8 @@ public class NeoStatisticsService : INeoStatisticsService
         return distribution;
     }
 
-        public async Task<IEnumerable<NeoAnomalyResponse>?> DetectAnomaliesAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<NeoAnomalyResponse>?> DetectAnomaliesAsync(
+        CancellationToken cancellationToken = default)
     {
         var data = await _neoRepository
             .GetFullNearEarthObjectsAsQueryable()
