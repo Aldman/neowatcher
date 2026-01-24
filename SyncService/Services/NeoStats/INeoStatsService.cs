@@ -5,5 +5,5 @@ namespace SyncService.Services.NeoStats;
 
 public interface INeoStatsService
 {
-    Task <IEnumerable<NeoStatsResponse>> GetFilteredStatsAsync(NeoFilterRequest filter, CancellationToken cancellationToken);
+    Task <IEnumerable<NeoStatsResponse>?> GetFilteredStatsAsync(NeoFilterRequest filter, CancellationToken cancellationToken);
 }

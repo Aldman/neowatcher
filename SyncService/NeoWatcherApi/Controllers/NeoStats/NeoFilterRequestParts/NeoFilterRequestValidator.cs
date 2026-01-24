@@ -11,10 +11,14 @@ public static class NeoFilterRequestValidator
             && request.From >= request.To)
             throw new ArgumentException(message: CommonExceptionTexts.FromMoreThanTo);
         
+        if (request is { MaxDiameter: not null, MinDiameter: not null }
+            && request.MaxDiameter <= request.MinDiameter)
+            throw new ArgumentException(message: CommonExceptionTexts.MaxDiameterLessThenMin);
+        
         if (request.MaxDiameter is <= 0)
-            throw new ArgumentException("MaxDiameter must be greater than 0");
+            throw new ArgumentException(message: CommonExceptionTexts.MaxDiameterLessThenZero);
         
         if (request.MinDiameter is < 0)
-            throw new ArgumentException("MinDiameter should not be negative ");
+            throw new ArgumentException(message: CommonExceptionTexts.MinDiameterNegative);
     }
 }

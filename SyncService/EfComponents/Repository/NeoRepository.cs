@@ -1,4 +1,5 @@
-﻿using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
+﻿using Microsoft.EntityFrameworkCore;
+using SyncService.Api.NeoWatcher.NeoFilterRequestParts;
 using SyncService.EfComponents.DbSets;
 using SyncService.Extensions;
 
@@ -55,6 +56,10 @@ public class NeoRepository : INeoRepository
     }
 
     public IQueryable<DbNearEarthObject> GetNearEarthObjectsAsQueryable() => _neoContext.NearEarthObjects.AsQueryable();
+    public IQueryable<DbNearEarthObject> GetFullNearEarthObjectsAsQueryable() 
+        => _neoContext.NearEarthObjects
+            .Include(x => x.CloseApproachData)
+            .AsQueryable();
 
     private HashSet<string> GetCurrentDbObjectsIds()
     {

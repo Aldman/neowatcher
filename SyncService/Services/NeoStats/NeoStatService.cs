@@ -15,12 +15,14 @@ public class NeoStatsService : INeoStatsService
         _neoRepository = neoRepository;
     }
     
-    public async Task<IEnumerable<NeoStatsResponse>> GetFilteredStatsAsync(
+    public async Task<IEnumerable<NeoStatsResponse>?> GetFilteredStatsAsync(
         NeoFilterRequest filter,
         CancellationToken cancellationToken = default)
     {
         var query = _neoRepository.GetFilteredQuery(filter);
         var grouped = await GroupByDateAsync(query, cancellationToken);
+        
+        if (grouped.Count == 0) return null;
 
         return filter.SortBy.HasValue
             ? Sort(filter, grouped)

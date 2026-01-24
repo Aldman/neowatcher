@@ -17,8 +17,17 @@ public class NeoAnalyticsController : NeoControllerBase
         _analyticsService = analyticsService;
     }
 
+    /// <summary>
+    /// Получение аналитических данных по диапазону дат.
+    /// Группирует объекты по датам и вычисляет статистики: общее количество, количество опасных объектов,
+    /// максимальный/минимальный диаметр, средняя скорость.
+    /// </summary>
+    /// <param name="from">Начальная дата диапазона</param>
+    /// <param name="to">Конечная дата диапазона</param>
+    /// <returns>Аналитические данные по датам в указанном диапазоне</returns>
     [HttpGet("byDateRange")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
     public async Task<IActionResult> GetAnalyticsByDateRangeAsync(
         DateTime from,
@@ -29,14 +38,10 @@ public class NeoAnalyticsController : NeoControllerBase
             return validationProblem!;
         
         var cacheKey = CacheKeyGenerator.Generate(from, to);
-        if (MemoryCache.TryGetValue(cacheKey, out var response))
-            return Ok(response);
-
-        var results = await _analyticsService
-            .GetDateRangeAnalyticsAsync(from, to, cancellationToken);
-        
-        MemoryCache.Set(cacheKey, results, CacheOptions);
-        return Ok(results);
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _analyticsService.GetDateRangeAnalyticsAsync(from, to, cancellationToken),
+            returnNoContentIfNull: true);
     }
     
     private bool IsRangeInvalid(DateTime from, DateTime to, out IActionResult? validationProblem)
@@ -54,23 +59,35 @@ public class NeoAnalyticsController : NeoControllerBase
         return false;
     }
     
+    /// <summary>
+    /// Анализ опасных объектов по времени.
+    /// Группирует объекты по году, месяцу и статусу опасности для анализа распределения опасных объектов.
+    /// </summary>
+    /// <returns>Анализ распределения опасных объектов по времени</returns>
     [HttpGet("hazardousAnalysis")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> GetHazardousAnalysisAsync(CancellationToken cancellationToken = default)
     {
         var cacheKey = CacheKeyGenerator.Generate();
-        if (MemoryCache.TryGetValue(cacheKey, out var response))
-            return Ok(response);
-
-        var results = await _analyticsService
-            .GetHazardousAnalysisAsync(cancellationToken);
-        
-        MemoryCache.Set(cacheKey, results, CacheOptions);
-        return Ok(results);
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _analyticsService.GetHazardousAnalysisAsync(cancellationToken),
+            returnNoContentIfNull: true);
     }
     
+    /// <summary>
+    /// Сравнение двух временных периодов.
+    /// Вычисляет изменения в процентах между периодами и анализирует тренды.
+    /// </summary>
+    /// <param name="period1Start">Начало первого периода</param>
+    /// <param name="period1End">Конец первого периода</param>
+    /// <param name="period2Start">Начало второго периода</param>
+    /// <param name="period2End">Конец второго периода</param>
+    /// <returns>Результат сравнения двух периодов с анализом изменений</returns>
     [HttpGet("comparePeriods")]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status416RangeNotSatisfiable)]
     public async Task<IActionResult> ComparePeriodsAsync(
         DateTime period1Start,
@@ -85,13 +102,11 @@ public class NeoAnalyticsController : NeoControllerBase
             return validationProblem2!;
         
         var cacheKey = CacheKeyGenerator.Generate(period1Start, period1End, period2Start, period2End);
-        if (MemoryCache.TryGetValue(cacheKey, out var response))
-            return Ok(response);
-
-        var results = await _analyticsService
-            .ComparePeriodsAsync(period1Start, period1End, period2Start, period2End, cancellationToken);
         
-        MemoryCache.Set(cacheKey, results, CacheOptions);
-        return Ok(results);
+        return await GetFromCacheOrExecuteAsync(
+            cacheKey: cacheKey,
+            executeAsync: () => _analyticsService
+                .ComparePeriodsAsync(period1Start, period1End, period2Start, period2End, cancellationToken),
+            returnNoContentIfNull: false);
     }
 }
